@@ -1,0 +1,6 @@
+{
+  "name": "MTC RUN Construction",
+  "description": "Site vitrine d'architecture et de bâtiment ultra-premium pour MTC RUN CONSTRUCTION.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
