@@ -37,6 +37,7 @@ export default function Testimonials() {
   });
 
   const [dragActive, setDragActive] = useState(false);
+  const [sizeAlertOpen, setSizeAlertOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Reset active photo index when active testimonial changes
@@ -73,9 +74,15 @@ export default function Testimonials() {
   const processFiles = (files: FileList) => {
     const remainingSlots = 10 - formData.projectPhotos.length;
     const filesToProcess = Array.from(files).slice(0, remainingSlots);
+    let sizeError = false;
 
     filesToProcess.forEach(file => {
       if (file.type.startsWith('image/')) {
+        if (file.size > 5 * 1024 * 1024) {
+          sizeError = true;
+          return;
+        }
+
         const reader = new FileReader();
         reader.onloadend = () => {
           if (typeof reader.result === 'string') {
@@ -114,6 +121,10 @@ export default function Testimonials() {
         reader.readAsDataURL(file);
       }
     });
+
+    if (sizeError) {
+      setSizeAlertOpen(true);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -663,8 +674,8 @@ export default function Testimonials() {
                       <p className="font-sans text-xs text-stone-700 font-medium">
                         Déposez vos photos ou <span className="text-[#C5A059] underline font-semibold">parcourez votre ordinateur</span>
                       </p>
-                      <p className="font-sans text-[10px] text-stone-400">
-                        Fichiers JPG, PNG acceptés (Max 10).
+                      <p className="font-sans text-[10px] text-stone-400 font-medium">
+                        Fichiers JPG, PNG acceptés (Max 10 / <span className="text-rose-500">Max 5 Mo par photo</span>).
                       </p>
                     </div>
                   </div>
@@ -815,6 +826,48 @@ export default function Testimonials() {
               <p className="font-sans text-[11px] text-stone-500 leading-relaxed uppercase tracking-wider">
                 Merci infiniment pour votre partage. Votre témoignage a été transmis à l'administrateur et sera publié après validation.
               </p>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Photo Size Limit Alert Overlay */}
+      <AnimatePresence>
+        {sizeAlertOpen && (
+          <div className="fixed inset-0 z-110 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-stone-900/60 backdrop-blur-sm" onClick={() => setSizeAlertOpen(false)}></div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative bg-white border border-rose-200 p-8 text-center max-w-sm w-full space-y-5 shadow-2xl z-20 overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-1 bg-rose-500"></div>
+              
+              <div className="w-14 h-14 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto shadow-sm ring-4 ring-rose-50/50">
+                <UploadCloud className="w-6 h-6" />
+              </div>
+              
+              <div className="space-y-2">
+                <h3 className="font-serif text-lg font-bold text-stone-900">Image Trop Volumineuse</h3>
+                <p className="font-sans text-xs text-stone-500 leading-relaxed">
+                  L'image que vous tentez d'importer dépasse la limite stricte de <span className="font-bold text-rose-600">5 Mo</span>.
+                </p>
+                <div className="bg-stone-50 border border-stone-200 p-3 mt-4 text-left">
+                  <p className="font-sans text-[10px] text-stone-600">
+                    <strong className="block text-stone-800 mb-1 tracking-wider uppercase text-[9px]">Pourquoi cette limite ?</strong>
+                    Pour garantir des performances de chargement ultra-rapides du site web sur mobile et assurer un hébergement écologique optimal de l'application, nous limitons le poids des ressources.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSizeAlertOpen(false)}
+                className="w-full mt-4 bg-stone-900 hover:bg-stone-800 text-white font-sans text-xs font-bold uppercase tracking-widest px-6 py-3 transition-colors"
+              >
+                Compris, merci
+              </button>
             </motion.div>
           </div>
         )}

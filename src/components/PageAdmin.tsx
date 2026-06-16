@@ -180,6 +180,10 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
         errorMsg = 'Seuls les fichiers d’image sont autorisés.';
         continue;
       }
+      if (file.size > 5 * 1024 * 1024) {
+        errorMsg = `L'image "${file.name}" dépasse 5 Mo. Veuillez choisir une image plus légère.`;
+        continue;
+      }
       validFiles.push(file);
     }
 
