@@ -9,7 +9,7 @@ export default function Footer({ setCurrentPage, openModal }: FooterProps) {
   const links = [
     {
       label: 'Mentions Légales',
-      content: 'MTC RUN CONSTRUCTION\nEntreprise Individuelle dirigée par Sébastien Boistel\nSiège social : Bureau 66 bis rue de l\'Océan, 97460 Saint-Paul, La Réunion\nEmail : sebastienboistel974@gmail.com\nTéléphone : 06 92 59 65 20\nSIRET : En cours d\'enregistrement\nCode APE : 4399C (Travaux de charpente)\n\nHébergeur : Google Cloud Run Container Service'
+      content: 'MTC RUN CONSTRUCTION\nEntreprise Individuelle dirigée par Sébastien Boistel\nSiège social : Bureau 45 Allée des Basilics, Bois Rouge, 97460 Saint-Paul, La Réunion\nEmail : mtcrunconstruction@gmail.com\nTéléphone : 0692 596 520\nSIRET : 10236343900013\nCode APE : 4399C (Gros oeuvres / Travaux de charpente)\n\nHébergeur : Google Cloud Run Container Service'
     },
     {
       label: 'Politique de Confidentialité',
@@ -17,15 +17,11 @@ export default function Footer({ setCurrentPage, openModal }: FooterProps) {
     },
     {
       label: 'Paramètres des Cookies',
-      content: 'Nous utilisons uniquement des cookies techniques essentiels au bon fonctionnement et à l\'affichage de notre plateforme. Aucun traceur publicitaire ou de profilage tiers n\'est actif sur notre site vitrine d\'exception.'
+      content: 'Nous utilisons uniquement des cookies techniques essentiels au bon fonctionnement et à l\'affichage de notre plateforme. Aucun traceur publicitaire ou de profilage tiers n\'est actif sur notre site vitrine.'
     },
     {
       label: 'Rapport de Durabilité',
-      content: 'EXIGENCE ÉCOLOGIQUE & ENGAGEMENT LOCAL :\nMTC RUN CONSTRUCTION s\'engage au quotidien pour un habitat vertueux :\n- 100% de nos bois de structure proviennent de forêts gérées de manière éco-responsable (FSC / PEFC).\n- Réduction de l\'empreinte carbone à travers l\'optimisation de nos découpes par commande numérique (CNC).\n- Recyclage systématique des résidus de bois en paillage local ou énergie bois.'
-    },
-    {
-      label: 'Portfolio PDF',
-      content: 'MTC RUN construction présente son catalogue d\'excellence.\nNotre catalogue complet détaillant nos méthodes d\'ingénierie bois, de charpente traditionnelle et de maçonnerie armée haut de gamme sera bientôt téléchargeable au format PDF.\n\nPour toute demande immédiate de documents techniques, veuillez nous contacter directement à l\'adresse : sebastienboistel974@gmail.com'
+      content: 'EXIGENCE ÉCOLOGIQUE & ENGAGEMENT LOCAL :\nMTC RUN CONSTRUCTION s\'engage au quotidien pour un habitat vertueux :\n- 100% de nos bois de structure proviennent de forêts gérées de manière éco-responsable (FSC / PEFC).\n- Recyclage systématique des résidus de bois en paillage local ou énergie bois.'
     }
   ];
 

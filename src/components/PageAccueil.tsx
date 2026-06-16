@@ -1,7 +1,7 @@
 import { DIRIGEANT_PORTRAIT, HERO_ACCUEIL_BG, engagements } from '../data';
 import { Page } from '../types';
 import { motion } from 'motion/react';
-import { TreePine, Cpu, Timer, ArrowRight, Award, FileText, ExternalLink, ShieldCheck } from 'lucide-react';
+import { TreePine, Cpu, Timer, ArrowRight, GraduationCap, FileText, ExternalLink, ShieldCheck } from 'lucide-react';
 import Testimonials from './Testimonials';
 import ECHOBAT_LOGO from '../assets/images/regenerated_image_1781250096754.png';
 
@@ -127,7 +127,7 @@ export default function PageAccueil({ setCurrentPage }: PageAccueilProps) {
                   <h3 className="font-serif text-xl font-medium group-hover:text-[#C5A059] transition-colors duration-300 text-white">
                     {engagement.title}
                   </h3>
-                  <p className="font-sans text-gray-400 text-sm md:text-base leading-relaxed font-light">
+                  <p className="font-sans text-gray-400 text-sm md:text-base leading-relaxed font-light text-justify hyphens-none">
                     {engagement.description}
                   </p>
                   {engagement.id === 'devis' && (
@@ -199,7 +199,7 @@ export default function PageAccueil({ setCurrentPage }: PageAccueilProps) {
 
               <div className="space-y-4 text-gray-300 font-sans text-sm md:text-base leading-relaxed font-light text-justify hyphens-none">
                 <p>
-                  MTC RUN est fier de faire partie de l'association <strong>ÉCHOBAT</strong>. Depuis 2010, ce réseau collaboratif rassemble les acteurs engagés de l'<strong>écoconstruction</strong>, de l'<strong>insertion par l'activité économique</strong> et de la <strong>formation professionnelle</strong>.
+                  MTC RUN est fier d'être adhérent de l'association <strong>ÉCHOBAT</strong>. Depuis 2010, ce réseau collaboratif rassemble les acteurs engagés de l'<strong>écoconstruction</strong>, de l'<strong>insertion par l'activité économique</strong> et de la <strong>formation professionnelle</strong>.
                 </p>
                 <p>
                   À travers ce partenariat de confiance, nous accompagnons les maîtres d'ouvrage (particuliers, entreprises et collectivités) dans la réussite de leurs projets de construction écologique et de <strong>rénovation énergétique performante</strong>.
@@ -247,7 +247,7 @@ export default function PageAccueil({ setCurrentPage }: PageAccueilProps) {
 
               <div className="space-y-6 text-gray-700 font-sans text-base md:text-lg leading-relaxed font-light text-justify hyphens-none">
                 <p>
-                  Fort de plus de 15 années d'expérience dans le secteur de la construction haut de gamme, Sébastien Boistel incarne la rigueur et la passion du bâti. Certifié par l'AFPAR, son parcours est jalonné de réalisations complexes alliant technicité et esthétisme.
+                  Fort de plus de 20 années d'expérience dans le secteur de la construction haut de gamme, Sébastien Boistel incarne la rigueur et la passion du bâti. Certifié par l'AFPAR, son parcours est jalonné de réalisations complexes alliant technicité et esthétisme.
                 </p>
                 <p>
                   Spécialisé dans la maçonnerie de précision et le travail des bois nobles, il dirige chaque projet avec une vision architecturale globale, garantissant une exécution sans faille du gros œuvre aux finitions les plus délicates.
@@ -257,15 +257,15 @@ export default function PageAccueil({ setCurrentPage }: PageAccueilProps) {
               {/* Key indicators */}
               <div className="pt-6 border-t border-gray-200 flex flex-row flex-wrap xl:flex-nowrap justify-between items-center w-full">
                 <div className="flex items-center gap-3">
-                  <Award className="w-8 h-8 text-[#051a0f]" />
+                  <GraduationCap className="w-8 h-8 text-[#051a0f]" />
                   <div className="text-left">
                     <span className="block font-sans text-[11px] tracking-widest text-[#C5A059] uppercase font-bold">AFPAR CERTIFIÉ</span>
-                    <span className="block font-sans text-xs text-gray-500">Label d'excellence</span>
+                    <span className="block font-sans text-xs text-gray-500">Diplômé 2006</span>
                   </div>
                 </div>
                 <div className="hidden md:block h-8 w-px bg-gray-200"></div>
                 <div className="flex items-center gap-3">
-                  <span className="font-serif text-4xl font-extrabold text-[#051a0f]">15+</span>
+                  <span className="font-serif text-4xl font-extrabold text-[#051a0f]">20+</span>
                   <div className="text-left">
                     <span className="block font-sans text-[11px] tracking-widest text-[#C5A059] uppercase font-bold">Années d'expérience</span>
                     <span className="block font-sans text-xs text-gray-500">Bâtiment d'exception</span>
@@ -275,7 +275,7 @@ export default function PageAccueil({ setCurrentPage }: PageAccueilProps) {
                 <div className="flex items-center gap-3">
                   <ShieldCheck className="w-8 h-8 text-[#051a0f]" />
                   <div className="text-left">
-                    <span className="block font-sans text-[11px] tracking-widest text-[#C5A059] uppercase font-bold">DÉCENNALE</span>
+                    <span className="block font-sans text-[11px] tracking-widest text-[#C5A059] uppercase font-bold">RC DÉCENNALE</span>
                     <span className="block font-sans text-xs text-gray-500">Garantie 10 ans</span>
                   </div>
                 </div>

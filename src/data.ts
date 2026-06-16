@@ -24,8 +24,8 @@ export const engagements: Engagement[] = [
   {
     id: "durabilite",
     number: "01",
-    title: "Durabilité FSC",
-    description: "Nous sélectionnons rigoureusement des essences de bois issues de forêts gérées durablement, garantissant l'intégrité écologique de chaque réalisation.",
+    title: "Ecologie",
+    description: "Nous utilisons des essences de bois issues de forêts gérées durablement, garantissant l'intégrité écologique de chaque réalisation. Ce choix écoresponsable s’associe à des traitements de haute technicité, parfaitement adaptés à la préservation de vos structures face aux exigences du climat tropical.",
     iconName: "Trees"
   },
   {
@@ -38,8 +38,8 @@ export const engagements: Engagement[] = [
   {
     id: "delais",
     number: "03",
-    title: "Respect des Délais",
-    description: "Nous nous engageons à respecter scrupuleusement les délais convenus et validés ensemble à l'initialisation de votre projet de construction.",
+    title: "Respect des Délais et des Budgets",
+    description: "Nous nous engageons à respecter scrupuleusement les délais convenus et les budgets validés ensemble à l'initialisation de votre projet de construction, vous garantissant une transparence totale et une parfaite maîtrise financière.",
     iconName: "Timer"
   }
 ];

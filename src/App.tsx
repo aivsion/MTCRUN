@@ -7,6 +7,7 @@ import PagePrestations from './components/PagePrestations';
 import PageGalerie from './components/PageGalerie';
 import PageContact from './components/PageContact';
 import PageAdmin from './components/PageAdmin';
+import Page404 from './components/Page404';
 import { getStoredPhotos } from './utils/galleryStorage';
 import { X, Check, ChevronLeft, ChevronRight, Maximize } from 'lucide-react';
 
@@ -24,8 +25,19 @@ export default function App() {
     const handleUrlChange = () => {
       const path = window.location.pathname.toUpperCase();
       const hash = window.location.hash.toUpperCase();
+      
       if (path === '/ADMIN' || path === '/ADMIN/' || hash === '#/ADMIN' || hash === '#ADMIN') {
         setCurrentPage('admin');
+      } else if (path === '/CONTACT' || path === '/CONTACT/') {
+        setCurrentPage('contact');
+      } else if (path === '/PRESTATIONS' || path === '/PRESTATIONS/') {
+        setCurrentPage('prestations');
+      } else if (path === '/GALERIE' || path === '/GALERIE/' || path === '/REALISATIONS' || path === '/REALISATIONS/') {
+        setCurrentPage('galerie');
+      } else if (path === '/' || path === '' || path === '/INDEX.HTML') {
+        setCurrentPage('accueil');
+      } else {
+        setCurrentPage('404');
       }
     };
     
@@ -164,6 +176,8 @@ export default function App() {
             onPhotosUpdated={() => setPhotos(getStoredPhotos())} 
           />
         );
+      case '404':
+        return <Page404 setCurrentPage={setCurrentPage} />;
       default:
         return <PageAccueil setCurrentPage={setCurrentPage} />;
     }

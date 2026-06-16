@@ -15,6 +15,17 @@ export default function Header({ currentPage, setCurrentPage, scrollToSection }:
   const handleNav = (page: Page, sectionId?: string) => {
     setIsOpen(false);
     setCurrentPage(page);
+
+    // Update the URL properly so 404 and page refreshes work beautifully
+    let path = '/';
+    if (page === 'contact') path = '/contact';
+    else if (page === 'prestations') path = '/prestations';
+    else if (page === 'galerie') path = '/galerie';
+    
+    if (window.location.pathname !== path) {
+      window.history.pushState({}, '', path);
+    }
+
     if (sectionId) {
       // Delay slightly to allow page routing state to commit if switching pages
       setTimeout(() => {

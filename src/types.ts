@@ -1,4 +1,4 @@
-export type Page = 'accueil' | 'prestations' | 'galerie' | 'contact' | 'admin';
+export type Page = 'accueil' | 'prestations' | 'galerie' | 'contact' | 'admin' | '404';
 
 export interface Engagement {
   id: string;
