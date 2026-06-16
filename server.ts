@@ -38,11 +38,11 @@ async function startServer() {
       }
 
       await transporter.sendMail({
-        from: `"${fullName}" <${process.env.SMTP_USER || 'mtcrunconstruction@gmail.com'}>`, // Gmail often rewrites 'from' to authenticated user anyway, so we just format it nicely. We can add replyTo.
+        from: `"Site Web MTC" <${process.env.SMTP_USER || 'mtcrunconstruction@gmail.com'}>`, 
         replyTo: email,
         to: 'mtcrunconstruction@gmail.com',
-        subject: `Nouveau contact MTC RUN : ${projectType} - ${fullName}`,
-        text: `Nom: ${fullName}\nEmail: ${email}\nTéléphone: ${phone}\nProjet: ${projectType}\n\nMessage:\n${message}`,
+        subject: `[Site Web] Nouveau contact de ${fullName}`,
+        text: `Vous avez reçu un nouveau message depuis le formulaire de contact du site internet.\n\nNom: ${fullName}\nEmail: ${email}\nTéléphone: ${phone}\nCatégorie du projet: ${projectType}\n\nMessage:\n${message}\n\n--\nSite Web MTC RUN CONSTRUCTION`,
       });
       res.status(200).json({ success: true });
     } catch (e: any) {
@@ -62,10 +62,10 @@ async function startServer() {
       }
 
       await transporter.sendMail({
-        from: `"MTC RUN Website" <${process.env.SMTP_USER || 'mtcrunconstruction@gmail.com'}>`,
+        from: `"Site Web MTC" <${process.env.SMTP_USER || 'mtcrunconstruction@gmail.com'}>`,
         to: 'mtcrunconstruction@gmail.com',
-        subject: `[A APPROUVER] Nouveau témoignage de ${clientName}`,
-        text: `Bonjour,\n\nUn nouveau témoignage a été posté sur votre site internet et est en attente d'approbation.\n\nClient : ${clientName}\nVille : ${city}\nProjet : ${projectType}\n\nCommentaire :\n"${comment}"\n\nRendez-vous dans l'espace administration (onglet Témoignages) pour l'approuver ou le refuser.\n\nCordialement,\nVotre site web MTC RUN`,
+        subject: `[Site Web] Nouveau témoignage à approuver (${clientName})`,
+        text: `Bonjour,\n\nUn nouveau témoignage a été posté sur votre site internet et est en attente d'approbation.\n\nClient : ${clientName}\nVille : ${city}\nProjet : ${projectType}\n\nCommentaire :\n"${comment}"\n\nRendez-vous dans l'espace d'administration (onglet "Témoignages & Modération") pour l'approuver et l'afficher sur le site.\n\n--\nSite Web MTC RUN CONSTRUCTION`,
       });
       res.status(200).json({ success: true });
     } catch (e: any) {
