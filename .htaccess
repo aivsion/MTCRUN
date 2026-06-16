@@ -1,0 +1,35 @@
+# Fix MIME types for JavaScript modules and CSS
+AddType application/javascript .js
+AddType text/css .css
+AddType image/jpeg .jpg .jpeg
+AddType image/png .png
+AddType image/webp .webp
+AddType image/svg+xml .svg
+AddType application/font-woff .woff
+AddType application/font-woff2 .woff2
+
+# Enable compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE application/javascript
+  AddOutputFilterByType DEFLATE text/css
+  AddOutputFilterByType DEFLATE text/html
+</IfModule>
+
+# Cache static assets
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+</IfModule>
+
+# SPA fallback: redirect all 404s to index.html
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
