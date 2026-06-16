@@ -21,7 +21,7 @@ export default function App() {
       setPhotos(data);
     });
     return () => unsubscribe();
-  }, [currentPage]);
+  }, []);
 
 
   // Route URL listener for /ADMIN or /admin

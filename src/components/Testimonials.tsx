@@ -15,12 +15,10 @@ export default function Testimonials() {
   useEffect(() => {
     const unsub = subscribeToPublicTestimonials((data) => {
       setList(data);
-      if (data.length > 0 && activeIndex >= data.length) {
-        setActiveIndex(0);
-      }
+      setActiveIndex(prev => (data.length > 0 && prev >= data.length) ? 0 : prev);
     });
     return () => unsub();
-  }, [activeIndex]);
+  }, []);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   // Form State
