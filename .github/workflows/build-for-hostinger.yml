@@ -1,0 +1,44 @@
+name: Compiler et déployer le site
+
+on:
+  push:
+    branches:
+      - main
+      - deploy
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 📦 Installer les dépendances
+        run: npm install
+
+      - name: 🏗️ Compiler le site (Build)
+        run: |
+          npm run build
+          cp dist/index.html dist/404.html
+          echo 'RewriteEngine On' > dist/.htaccess
+          echo 'RewriteCond %{REQUEST_FILENAME} !-f' >> dist/.htaccess
+          echo 'RewriteCond %{REQUEST_FILENAME} !-d' >> dist/.htaccess
+          echo 'RewriteRule . /index.html [L]' >> dist/.htaccess
+
+      - name: 🚀 Envoyer le résultat sur la branche 'production-hostinger'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: production-hostinger
+          publish_dir: ./dist
+          force_orphan: true
+          commit_message: "🚀 Update du build pour Hostinger"
