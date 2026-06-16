@@ -76,7 +76,7 @@ export default function Testimonials() {
 
     filesToProcess.forEach(file => {
       if (file.type.startsWith('image/')) {
-        if (file.size > 5 * 1024 * 1024) {
+        if (file.size > 10 * 1024 * 1024) {
           sizeError = true;
           return;
         }
@@ -673,7 +673,7 @@ export default function Testimonials() {
                         Déposez vos photos ou <span className="text-[#C5A059] underline font-semibold">parcourez votre ordinateur</span>
                       </p>
                       <p className="font-sans text-[10px] text-stone-400 font-medium">
-                        Fichiers JPG, PNG acceptés (Max 10 / <span className="text-rose-500">Max 5 Mo par photo</span>).
+                        Fichiers JPG, PNG acceptés (Max 10 / <span className="text-rose-500">Max 10 Mo par photo</span>).
                       </p>
                     </div>
                   </div>
@@ -849,7 +849,7 @@ export default function Testimonials() {
               <div className="space-y-2">
                 <h3 className="font-serif text-lg font-bold text-stone-900">Image Trop Volumineuse</h3>
                 <p className="font-sans text-xs text-stone-500 leading-relaxed">
-                  L'image que vous tentez d'importer dépasse la limite stricte de <span className="font-bold text-rose-600">5 Mo</span>.
+                  L'image que vous tentez d'importer dépasse la limite stricte de <span className="font-bold text-rose-600">10 Mo</span>.
                 </p>
                 <div className="bg-stone-50 border border-stone-200 p-3 mt-4 text-left">
                   <p className="font-sans text-[10px] text-stone-600">

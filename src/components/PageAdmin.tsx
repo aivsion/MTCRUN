@@ -180,8 +180,8 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
         errorMsg = 'Seuls les fichiers d’image sont autorisés.';
         continue;
       }
-      if (file.size > 5 * 1024 * 1024) {
-        errorMsg = `L'image "${file.name}" dépasse 5 Mo. Veuillez choisir une image plus légère.`;
+      if (file.size > 10 * 1024 * 1024) {
+        errorMsg = `L'image "${file.name}" dépasse 10 Mo. Veuillez choisir une image plus légère.`;
         continue;
       }
       validFiles.push(file);
@@ -733,7 +733,7 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
                           <p className="font-sans text-xs font-semibold text-[#051a0f]">
                             Glissez vos photos ici ou <span className="text-[#C5A059] underline">parcourez vos fichiers</span>
                           </p>
-                          <p className="text-[10px] text-stone-400 mt-1 font-light">Sélection individuelle ou multiple (PNG, JPG, jusqu'à 5 Mo)</p>
+                          <p className="text-[10px] text-stone-400 mt-1 font-light">Sélection individuelle ou multiple (PNG, JPG, jusqu'à 10 Mo)</p>
                         </div>
                       </>
                     )}
