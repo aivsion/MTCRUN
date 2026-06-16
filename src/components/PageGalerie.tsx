@@ -24,14 +24,11 @@ export default function PageGalerie({ openModal, photos }: PageGalerieProps) {
     : photos.filter(p => p.category === activeFilter);
 
   const handleDiscoverPhoto = (photo: GalleryPhoto) => {
-    const details = `OUVRAGE DE HAUTE PRÉCISION : ${photo.title}
-Localisation : ${photo.location}
-Spécificité : ${photo.chantierName} (${photo.category})
-
-SPÉCIFICATIONS TECHNIQUES ET RÉSISTANCE :
-${photo.description}
-
-Chez MTC RUN CONSTRUCTION, nos charpentes fines, menuiseries d'exception et decks de varangues font l'objet d'un processus rigoureux : sélection méticuleuse d'essences d'arbres locales et d'importations durables (FSC), contrôle hygrométrique à 12%, taille d'une précision millimétrique par commande numérique (CNC), et finition de haute durabilité préservant le veinage et résistant aux dures atmosphères marines de La Réunion.`;
+    let details = '';
+    if (photo.location) details += `📍 Localisation : ${photo.location}\n`;
+    if (photo.chantierName) details += `🏗️ Projet : ${photo.chantierName}\n`;
+    if (photo.location || photo.chantierName) details += `\n`;
+    details += photo.description || '';
 
     // Backward compatibility for old photos that only have url string
     const firstImage = (photo.urls && photo.urls.length > 0) ? photo.urls[0] : (photo.url || undefined);

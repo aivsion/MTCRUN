@@ -358,7 +358,6 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
 
       // Reset Form & state
       resetForm();
-      onPhotosUpdated(); // Trigger refresh in parent
       // Note: we can't reliably load getStoredPhotos if it hasn't synced, but we use subscription
       setTimeout(() => setSuccessMessage(''), 4000);
     } catch (err: any) {
@@ -426,7 +425,6 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
       deletePhotoFromStorage(id)
         .then(() => {
           setSuccessMessage('Photo supprimée définitivement.');
-          onPhotosUpdated(); // Trigger parent reload
           // We rely on subscribeToGalleryPhotos to update photos state automatically
           setTimeout(() => setSuccessMessage(''), 3000);
           if (isEditing && editingPhoto?.id === id) {
@@ -447,7 +445,6 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
     if (confirmClear) {
       saveStoredPhotos([]);
       setPhotos([]);
-      onPhotosUpdated(); // Sync empty list to the rest of the application
       setSuccessMessage('✨ La galerie a été entièrement vidée. Vous pouvez maintenant repartir à zéro !');
       setTimeout(() => setSuccessMessage(''), 5000);
       resetForm();
