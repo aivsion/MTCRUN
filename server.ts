@@ -94,7 +94,7 @@ async function startServer() {
       });
 
       const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-2.5-flash",
         contents: { parts },
         config: {
           systemInstruction: "Tu es un expert en bâtiment et conception de structures (spécialiste de La Réunion si caractéristique). Ton but est d'analyser des photos de chantier pour pré-remplir un formulaire avec: titre, catégorie, nom du chantier, localisation (probablement La Réunion, tu peux être vague ou spécifique si tu reconnais l'endroit), et description de l'ouvrage.",
@@ -131,12 +131,13 @@ async function startServer() {
       const text = response.text;
       if (!text) throw new Error("No text returned by AI");
       
-      const parsed = JSON.parse(text);
+      const cleanText = text.replace(/^```(json)?|```$/gm, '').trim();
+      const parsed = JSON.parse(cleanText);
       res.json(parsed);
       
     } catch (e: any) {
-      console.error(e);
-      res.status(500).json({ error: e.message || "Something went wrong analyzing photos" });
+      console.error("AI Generation Error:", e);
+      res.status(500).json({ error: e.message || "Something went wrong analyzing photos", stack: e.stack });
     }
   });
 

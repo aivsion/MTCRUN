@@ -65,23 +65,24 @@ export default function Testimonials() {
   };
 
   const processFiles = (files: FileList) => {
-    const photoURLs: string[] = [];
     const remainingSlots = 10 - formData.projectPhotos.length;
     const filesToProcess = Array.from(files).slice(0, remainingSlots);
 
     filesToProcess.forEach(file => {
       if (file.type.startsWith('image/')) {
-        const url = URL.createObjectURL(file);
-        photoURLs.push(url);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (typeof reader.result === 'string') {
+            const base64Data = reader.result;
+            setFormData(prev => ({
+              ...prev,
+              projectPhotos: [...prev.projectPhotos, base64Data].slice(0, 10)
+            }));
+          }
+        };
+        reader.readAsDataURL(file);
       }
     });
-
-    if (photoURLs.length > 0) {
-      setFormData(prev => ({
-        ...prev,
-        projectPhotos: [...prev.projectPhotos, ...photoURLs].slice(0, 10)
-      }));
-    }
   };
 
   const handleDrop = (e: React.DragEvent) => {

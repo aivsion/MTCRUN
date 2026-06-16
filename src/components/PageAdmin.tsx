@@ -265,7 +265,10 @@ export default function PageAdmin({ setCurrentPage, onPhotosUpdated }: PageAdmin
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ images: uploadedFiles.map(f => f.url) })
       });
-      if (!response.ok) throw new Error("Erreur lors de l'analyse IA");
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || "Erreur lors de l'analyse IA");
+      }
       
       const data = await response.json();
       setFormData(prev => ({
@@ -278,9 +281,9 @@ export default function PageAdmin({ setCurrentPage, onPhotosUpdated }: PageAdmin
       }));
       setSuccessMessage('✨ Formulaire auto-rempli par l\'IA avec succès !');
       setTimeout(() => setSuccessMessage(''), 4000);
-    } catch (e) {
-      console.error(e);
-      alert("Erreur lors de la génération IA. Veuillez rafraîchir et réessayer.");
+    } catch (e: any) {
+      console.error("AI Generate Error:", e);
+      alert(`Erreur lors de la génération IA: ${e.message}\nVeuillez réessayer.`);
     } finally {
       setIsGeneratingAI(false);
     }
