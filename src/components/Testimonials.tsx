@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { testimonials } from '../data';
 import { Testimonial } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { Quote, ChevronLeft, ChevronRight, Star, Plus, X, UploadCloud, Trash2, CheckCircle2 } from 'lucide-react';
+import { Quote, ChevronLeft, ChevronRight, Star, Plus, X, UploadCloud, Trash2, CheckCircle2, MessageSquare } from 'lucide-react';
 import { getStoredTestimonials } from '../utils/testimonialStorage';
 
 export default function Testimonials() {
@@ -121,7 +121,7 @@ export default function Testimonials() {
     });
   };
 
-  const handeSubmitTestimonial = (e: React.FormEvent) => {
+  const handeSubmitTestimonial = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.clientName || !formData.comment || !formData.projectType || !formData.city) {
       return;
@@ -172,6 +172,17 @@ export default function Testimonials() {
       setSuccessMessage(false);
       setIsFormOpen(false);
     }, 4500);
+
+    // Send notification to admin
+    try {
+      await fetch('/api/notify-testimonial', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newTestimonial)
+      });
+    } catch (e) {
+      console.error("Failed to send notification email", e);
+    }
   };
 
   return (
@@ -203,7 +214,7 @@ export default function Testimonials() {
         </div>
 
         {/* Interactive Split Showcase */}
-        {publicList.length > 0 && (
+        {publicList.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-stretch">
             
             {/* Left: Immersive Project Photo Gallery display (lg:col-span-6) */}
@@ -407,6 +418,12 @@ export default function Testimonials() {
 
             </div>
 
+          </div>
+        ) : (
+          <div className="text-center py-20 bg-stone-50 border border-stone-100">
+            <MessageSquare className="w-12 h-12 text-[#C5A059]/40 mx-auto mb-4" />
+            <p className="font-serif text-xl font-bold text-stone-600">Aucun témoignage pour le moment</p>
+            <p className="font-sans text-sm text-stone-500 mt-2 max-w-lg mx-auto">Soyez le premier à partager votre expérience avec MTC RUN CONSTRUCTION.</p>
           </div>
         )}
 

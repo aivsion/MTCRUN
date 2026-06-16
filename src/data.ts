@@ -62,7 +62,7 @@ export const domains: Domain[] = [
     id: "amenagement-bois",
     number: "02",
     title: "Aménagement BOIS",
-    description: "Sublimez vos espaces de vie extérieurs avec nos aménagements d'exception : terrasses suspendues (decking), varangues élégantes, garde-corps originaux ou pergolas contemporaines robustes.",
+    description: "Sublimez vos espaces de vie extérieurs avec nos aménagements artisanaux : terrasses suspendues (decking), varangues élégantes, garde-corps originaux ou pergolas contemporaines robustes.",
     bullets: [
       "Terrasses panoramiques haut de gamme",
       "Varangues d'exception sur mesure",
@@ -80,7 +80,7 @@ export const domains: Domain[] = [
       "Charpentes traditionnelles apparentes",
       "Structures lourdes en bois massif",
       "Ouvrages complexes à tenons & mortaises",
-      "Kiosques traditionnels d'exception"
+      "Kiosques traditionnels"
     ],
     imageUrl: REGEN_IMAGE_1781503634507
   },
@@ -90,10 +90,10 @@ export const domains: Domain[] = [
     title: "Projets Particuliers",
     description: "Construction de villas individuelles d'architecte, rénovations et restructurations complètes de l'existant, et agencements extérieurs clés en main sur mesure.",
     bullets: [
-      "Villas individuelles d'architecte",
+      "Villas individuelles",
       "Rénovations majeures et surélévations",
       "Restructurations d'envergure",
-      "Agencements extérieurs clés en main"
+      "Agencements extérieurs/intérieurs clés en main"
     ],
     imageUrl: REGEN_IMAGE_1781503640995
   },
@@ -164,138 +164,7 @@ export const projects: Project[] = [
   }
 ];
 
-export const testimonials: Testimonial[] = [
-  {
-    id: "testimonial-1",
-    clientName: "Jean-Pierre L.",
-    projectType: "Villa Contemporaine & Gros Œuvre",
-    city: "Saint-Gilles-les-Bains",
-    region: "La Réunion",
-    country: "France",
-    comment: "MTC RUN a réalisé la maçonnerie technique et le gros œuvre de notre villa d'architecte sur un terrain extrêmement escarpé. La précision d'exécution de Sébastien et sa gestion rigoureuse du chantier ont été remarquables. Une structure d'une solidité irréprochable face aux contraintes climatiques.",
-    rating: 5,
-    period: "Fin 2025",
-    projectPhotos: [
-      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80"
-    ]
-  },
-  {
-    id: "testimonial-2",
-    clientName: "Marie & Damien V.",
-    projectType: "Charpente Traditionnelle & Varangue",
-    city: "La Saline-les-Bains",
-    region: "La Réunion",
-    country: "France",
-    comment: "Nous souhaitions une grande varangue ouverte en bois de très haute qualité. MTC RUN a conçu un ouvrage d'art exceptionnel. Les finitions par commande numérique (CNC) d'une précision millimétrique et la finesse de l'assemblage traditionnel sont exceptionnelles.",
-    rating: 5,
-    period: "Début 2026",
-    projectPhotos: [
-      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=800&q=80"
-    ]
-  },
-  {
-    id: "testimonial-3",
-    clientName: "Laurent M.",
-    projectType: "Eco-Lodges Touristiques (Structure Bois)",
-    city: "Cilaos",
-    region: "La Réunion",
-    country: "France",
-    comment: "Pour le compte de notre domaine de prestige, Sébastien Boistel a su s'adapter parfaitement aux fortes exigences d'implantation des hauts. Les terrasses suspendues et les structures robustes en bois de classe d'emploi marine sont de pures merveilles.",
-    rating: 5,
-    period: "Avril 2026",
-    projectPhotos: [
-      "https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=800&q=80"
-    ]
-  },
-  {
-    id: "testimonial-4",
-    clientName: "Sophie T.",
-    projectType: "Terrasse Panoramique & Pergola",
-    city: "Saint-Paul",
-    region: "La Réunion",
-    country: "France",
-    comment: "Un accompagnement sur-mesure exceptionnel, de l'étude préparatoire jusqu'à la touche finale de saturateur. Notre terrasse suspendue fait face aux intempéries marines sans friche. Un gérant émérite, d'une grande écoute et d'une rigueur rare.",
-    rating: 5,
-    period: "Mars 2026",
-    projectPhotos: [
-      "https://images.unsplash.com/photo-1541123437800-1bb1317badc2?auto=format&fit=crop&w=800&q=80"
-    ]
-  }
-];
+export const testimonials: Testimonial[] = [];
 
-export const galleryPhotos: GalleryPhoto[] = [
-  {
-    id: "photo-1",
-    url: "https://lh3.googleusercontent.com/aida-public/AB6AXuCaUQpXmC5enSnMVaRjvBMnf38mu98qv5Vi8hFFZ-IWccHqxFz3RCl9D6bvd9tHI7gYcamIHhIibXULfwWMbvsW9KTd73VoUmelONNcMrQRS9GwGTqxb9-Q-VSa-Bq8emkLA1a5MfUAq8LvsHOCwtFkHpmlWKQpu2NPjCe0Zn4VVz0cCd33DkPTY7kigB65N4lWubbKcCdiO5uUH7PxZT2TJC7xDkvl74ch-tdca4HKfsVF8R2MZkzWe8v2uneZA1mkciXhpCfVG8w",
-    category: "CHARPENTE BOIS",
-    chantierId: "kiosque-eden",
-    chantierName: "Kiosque Traditionnel Éden",
-    location: "La Saline-les-Bains",
-    title: "Structure de Charpente Fine",
-    description: "Assemblage de charpente traditionnelle en bois massif à tenons et mortaises, ouvert sur jardin tropical réunionnais."
-  },
-  {
-    id: "photo-2",
-    url: "https://lh3.googleusercontent.com/aida-public/AB6AXuBFckyRP0DAph2jUHsgDx3MwlhjSKJWlo_mPnUcfFSQIc2hBUjltTBcHyupmLpC2NlXBtvtytOuWrXK5K-pmEysbQ___-M2lm_jz-R6GVEpXzVM5GnOxt8EpW0osjHE5nT_4reK1iEOFeQW5-9xcuQ9YGsFlMmMwJtgWByWpPsWxJRxEeXiJJqCDXPtOcarNaAeXBuyHU8ZKED7tOsTuawk9nXK4goBD2Ff5yVTqKx-bHsqGuvzr83EtCfLKtVUnHLPWlMgqyXCgHE",
-    category: "CHARPENTE BOIS",
-    chantierId: "villa-stgilles",
-    chantierName: "Villa contemporaine d'Architecte",
-    location: "Saint-Gilles-les-Bains",
-    title: "Élévation de l’Ossature Bois",
-    description: "Structure porteuse et ossature à grands volumes, conçue avec calculs structurels avancés contre les vents cycloniques."
-  },
-  {
-    id: "photo-3",
-    url: REGEN_IMAGE_AMENAGEMENT_BOIS,
-    category: "AMÉNAGEMENTS BOIS",
-    chantierId: "terrasse-cafres",
-    chantierName: "Terrasse Suspendue Panoramique",
-    location: "Plaine des Cafres",
-    title: "Deck Suspendu en Bois Exotique",
-    description: "Splendide prolongement extérieur en bois de classe marine d'une stabilité parfaite face au relief montagneux."
-  },
-  {
-    id: "photo-4",
-    url: "https://lh3.googleusercontent.com/aida-public/AB6AXuAmEQdXwMFjLyyKOrU3E6FSr3q1460tZp80vedWsiCYy2gA5wIIyhhbjek1FTppKdy4yzsftvJS1eehUB3BIrW3yi9sI6sZs_XfOfU2BanHKuPJHEre8oEpvCFCQe4VI_VEru8ODDNeVb9YYejAzIzxEaE2muYnnTQ3Tkny4FQKfrHnjo0Ud2XuHOICi3hiU5mTVn_FiMOcGS92ltlyz1nmitmv3hi1w4st_9q03xcaPPYgHPG6_3WfP5K8oFhjklC0KLmBfDawWoM",
-    category: "AMÉNAGEMENTS BOIS",
-    chantierId: "pergola-sleu",
-    chantierName: "Pergola Littorale d'Architecte",
-    location: "Saint-Leu",
-    title: "Lames Filtrantes & Poteaux Massifs",
-    description: "Une prouesse technique mariant bois massif tropical et intégration paysagère moderne pour briser l'intensité du soleil."
-  },
-  {
-    id: "photo-5",
-    url: "https://lh3.googleusercontent.com/aida-public/AB6AXuArbLoTKlkUMao3Js69w3sbsOYgHwsN-peoDO1MsnZncKUOQJ2TKdutPHrlTv01EJNMBizEOZrhExalkgtaXdLSIHDsLiM9ekf4Sg2EmK_za8G0RgqpVJSWi2-Xf1pP70CSnrrkFoJufJnAQ1M7sYugz-e2Ue16G_9DSuiuD5eyI_PzYkeia4g4ZTfazkdSkuZDHooEitbkd--0XqGlm4YscXfdeGe26dBNbAA8v-EGmDTOe48vfFHZJe0U-1jjnXSBqzzAmMfY-qw",
-    category: "MENUISERIE BOIS",
-    chantierId: "finition-stpaul",
-    chantierName: "Rénovation Écologique Échobat",
-    location: "Saint-Paul",
-    title: "Finitions d'Exception Vernies",
-    description: "Application professionnelle de saturateur protégeant et rehaussant l'éclat naturel du bois exposé au milieu salin. Réalisé sous l'égide du réseau national d'écoconstruction solidaire ÉCHOBAT."
-  },
-  {
-    id: "photo-6",
-    url: DETAIL_ARCHITECTURAL_IMG,
-    category: "MENUISERIE BOIS",
-    chantierId: "details-nobles",
-    chantierName: "Villas Nobles Réunionnaises",
-    location: "Saint-Gilles-les-Bains",
-    title: "Détails d'Assemblages Nobles",
-    description: "L'excellence du détail architectural : gros plan millimétrique sur nos assemblages traditionnels et façonnages de bois nobles sur mesure."
-  },
-  {
-    id: "photo-7",
-    url: "https://lh3.googleusercontent.com/aida-public/AB6AXuByLpPjFwWWR7IzvgKvUaWy5U-KSJC060yOqlWoFLsGcWeH5iNrPD50HV8R3-fZxX52sjc_TQX_YJw5khYxPO_6_xBlT3vz_WMlQ8gdxJePRSaRDvuNDBHcxl1cv5lTCmbPRBnT2O70rs7ie7p6HU4I-gRFxal4FgLoXmmeoJ324L63QPkS2Wv_WCVkMOmh4cTZTNd0O7ioMxZhJMZAwg8E0kvjaECbYgZaRoMCc6mXjnOd44XThijcIOfKtGJXGnW4IRwAOLVFxbg",
-    category: "CHARPENTE BOIS",
-    chantierId: "lodges-hauts",
-    chantierName: "Lodges et Varangues des Hauts",
-    location: "Cilaos",
-    title: "Structures & Échafaudages en Bois Massif",
-    description: "Élévation de structures de charpentes traditionnelles complexes en bois massif tropical, conçues avec rigueur pour résister aux climats des hauts de l'île."
-  }
-];
+export const galleryPhotos: GalleryPhoto[] = [];
 

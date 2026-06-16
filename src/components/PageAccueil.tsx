@@ -1,9 +1,9 @@
 import { DIRIGEANT_PORTRAIT, HERO_ACCUEIL_BG, engagements } from '../data';
 import { Page } from '../types';
 import { motion } from 'motion/react';
-import { TreePine, Cpu, Timer, ArrowRight, GraduationCap, FileText, ExternalLink, ShieldCheck } from 'lucide-react';
-import Testimonials from './Testimonials';
+import { Leaf, Cpu, Timer, ArrowRight, GraduationCap, FileText, ShieldCheck, ExternalLink } from 'lucide-react';
 import ECHOBAT_LOGO from '../assets/images/regenerated_image_1781250096754.png';
+import Testimonials from './Testimonials';
 
 interface PageAccueilProps {
   setCurrentPage: (page: Page) => void;
@@ -13,7 +13,7 @@ export default function PageAccueil({ setCurrentPage }: PageAccueilProps) {
   const getIcon = (iconName: string) => {
     switch (iconName) {
       case 'Trees':
-        return <TreePine className="w-8 h-8 text-[#C5A059]" />;
+        return <Leaf className="w-8 h-8 text-[#C5A059]" />;
       case 'Cpu':
         return <Cpu className="w-8 h-8 text-[#C5A059]" />;
       case 'FileText':
@@ -157,31 +157,46 @@ export default function PageAccueil({ setCurrentPage }: PageAccueilProps) {
         <div className="absolute right-0 top-0 w-96 h-96 bg-[#C5A059]/5 rounded-full blur-3xl pointer-events-none -mr-48 -mt-48"></div>
         <div className="absolute left-0 bottom-0 w-96 h-96 bg-[#03100a]/10 rounded-full blur-3xl pointer-events-none -ml-48 -mb-48"></div>
         
-        <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 pb-12 lg:pb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center lg:items-end">
             
             {/* Left Box with Logo and badge */}
-            <div className="lg:col-span-4 flex flex-col items-center justify-center text-center bg-white p-8 md:p-10 border border-[#C5A059]/20 shadow-xl relative group">
-              {/* Subtle top decoration gold line */}
-              <div className="absolute top-0 left-0 right-0 h-1  bg-[#C5A059]"></div>
-              
-              <div className="w-full h-24 flex items-center justify-center p-2 mb-6">
-                <img
-                  src={ECHOBAT_LOGO}
-                  alt="Logo ÉCHOBAT"
-                  className="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-105"
-                  referrerPolicy="no-referrer"
-                />
+            <div className="lg:col-span-4 flex flex-col gap-6 relative">
+              <div className="flex flex-col items-center justify-center text-center bg-white p-8 md:p-10 border border-[#C5A059]/20 shadow-xl relative group">
+                {/* Subtle top decoration gold line */}
+                <div className="absolute top-0 left-0 right-0 h-1  bg-[#C5A059]"></div>
+                
+                <div className="w-full h-24 flex items-center justify-center p-2 mb-6">
+                  <img
+                    src={ECHOBAT_LOGO}
+                    alt="Logo ÉCHOBAT"
+                    className="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+
+                <div className="w-full h-px bg-stone-100 my-4"></div>
+
+                <div className="space-y-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#051a0f]/5 border border-[#051a0f]/10 text-[#051a0f] font-sans text-[10px] font-bold uppercase tracking-widest rounded-full">
+                    <span className="w-1.5 h-1.5 bg-[#C5A059] rounded-full"></span>
+                    Adhérent Réseau
+                  </span>
+                  <span className="block font-mono text-[10px] text-stone-400 mt-2">Membre Actif • Réseau National</span>
+                </div>
               </div>
 
-              <div className="w-full h-px bg-stone-100 my-4"></div>
-
-              <div className="space-y-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#051a0f]/5 border border-[#051a0f]/10 text-[#051a0f] font-sans text-[10px] font-bold uppercase tracking-widest rounded-full">
-                  <span className="w-1.5 h-1.5 bg-[#C5A059] rounded-full"></span>
-                  Adhérent Réseau
-                </span>
-                <span className="block font-mono text-[10px] text-stone-400 mt-2">Membre Actif • Réseau National</span>
+              {/* Hanging Button Below the White Box */}
+              <div className="lg:absolute lg:top-[calc(100%+1.5rem)] lg:left-0 w-full flex justify-center">
+                <a
+                  href="https://www.echobat.fr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full justify-center inline-flex items-center gap-2.5 bg-[#C5A059] hover:bg-[#03100a] transition-all duration-300 text-[#051a0f] hover:text-white font-sans text-[11px] font-bold uppercase tracking-wider px-6 py-4 shadow-md border border-[#C5A059] hover:border-transparent cursor-pointer"
+                >
+                  <span>Découvrir echobat.fr</span>
+                  <ExternalLink className="w-3.5 h-3.5 animate-pulse" />
+                </a>
               </div>
             </div>
 
@@ -208,25 +223,11 @@ export default function PageAccueil({ setCurrentPage }: PageAccueilProps) {
                 Garant d'une démarche de haute qualité éthique et environnementale.
                 </p>
               </div>
-
-              <div className="pt-4 flex flex-wrap gap-4 items-center">
-                <a
-                  href="https://www.echobat.fr"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2.5 bg-[#C5A059] hover:bg-[#03100a] transition-all duration-300 text-[#051a0f] hover:text-white font-sans text-[11px] font-bold uppercase tracking-wider px-6 py-3.5 shadow-md border border-[#C5A059] hover:border-transparent cursor-pointer"
-                >
-                  <span>Découvrir echobat.fr</span>
-                  <ExternalLink className="w-3.5 h-3.5 animate-pulse" />
-                </a>
-              </div>
             </div>
 
           </div>
         </div>
       </section>
-
-      {/* 3. SECTION TÉMOIGNAGES CLIENTS */}
       <Testimonials />
 
       {/* 4. SECTION PARCOURS / CV DU DIRIGEANT (HÉRITAGE) */}

@@ -1,7 +1,7 @@
 import { GalleryPhoto } from '../types';
 import { galleryPhotos as defaultPhotos } from '../data';
 
-const STORAGE_KEY = 'mtc_run_gallery_photos_v1';
+const STORAGE_KEY = 'mtc_run_gallery_photos_v2';
 
 /**
  * Get all gallery photos from local storage, falling back to data.ts defaults

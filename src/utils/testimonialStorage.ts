@@ -1,7 +1,7 @@
 import { Testimonial } from '../types';
 import { testimonials as defaultTestimonials } from '../data';
 
-const STORAGE_KEY = 'mtc_testimonials';
+const STORAGE_KEY = 'mtc_testimonials_v2';
 
 /**
  * Get all testimonials from local storage, falling back to data.ts defaults

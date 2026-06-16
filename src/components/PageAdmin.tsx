@@ -32,7 +32,8 @@ import {
   Eye,
   EyeOff,
   Star,
-  CheckCircle2
+  CheckCircle2,
+  Wand2
 } from 'lucide-react';
 
 interface PageAdminProps {
@@ -78,6 +79,7 @@ export default function PageAdmin({ setCurrentPage, onPhotosUpdated }: PageAdmin
 
 // Success notifications
   const [successMessage, setSuccessMessage] = useState('');
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
   // Active Tab state
   const [activeTab, setActiveTab] = useState<'photos' | 'testimonials'>('photos');
@@ -125,7 +127,7 @@ export default function PageAdmin({ setCurrentPage, onPhotosUpdated }: PageAdmin
   // Handle Login
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (username.trim() === 'admin' && password === 'admin') {
+    if (username.trim() === 'MTCRUN' && password === 'Mtcrun974@') {
       setIsAuthenticated(true);
       localStorage.setItem('mtc_admin_authenticated', 'true');
       setLoginError('');
@@ -250,12 +252,46 @@ export default function PageAdmin({ setCurrentPage, onPhotosUpdated }: PageAdmin
     }));
   };
 
+  // Handle AI generation form fill
+  const handleAIGenerate = async () => {
+    if (uploadedFiles.length === 0) {
+      alert("Veuillez d'abord ajouter au moins une photo pour l'analyse.");
+      return;
+    }
+    setIsGeneratingAI(true);
+    try {
+      const response = await fetch('/api/analyze-photos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ images: uploadedFiles.map(f => f.url) })
+      });
+      if (!response.ok) throw new Error("Erreur lors de l'analyse IA");
+      
+      const data = await response.json();
+      setFormData(prev => ({
+        ...prev,
+        title: data.title || prev.title,
+        category: data.category || prev.category,
+        chantierName: data.chantierName || prev.chantierName,
+        location: data.location || prev.location,
+        description: data.description || prev.description,
+      }));
+      setSuccessMessage('✨ Formulaire auto-rempli par l\'IA avec succès !');
+      setTimeout(() => setSuccessMessage(''), 4000);
+    } catch (e) {
+      console.error(e);
+      alert("Erreur lors de la génération IA. Veuillez rafraîchir et réessayer.");
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
+
   // Handle form submission (Add or Edit)
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title || !formData.chantierName || !formData.location || !formData.description || !formData.url) {
-      alert('Veuillez renseigner tous les champs obligatoires (y compris l’image).');
+    if (!formData.url && uploadedFiles.length === 0) {
+      alert('Veuillez ajouter au moins une image.');
       return;
     }
 
@@ -263,37 +299,43 @@ export default function PageAdmin({ setCurrentPage, onPhotosUpdated }: PageAdmin
       // Edit mode
       const updated: GalleryPhoto = {
         ...editingPhoto,
-        title: formData.title,
-        category: formData.category,
-        chantierName: formData.chantierName,
-        location: formData.location,
-        description: formData.description,
-        url: formData.url
+        title: formData.title || 'Nouvelle réalisation',
+        category: formData.category || 'CHARPENTE BOIS',
+        chantierName: formData.chantierName || 'Nouveau Chantier',
+        location: formData.location || 'La Réunion',
+        description: formData.description || '',
+        url: formData.url || editingPhoto.url
       };
       updatePhotoInStorage(updated);
       setSuccessMessage('Photo de chantier modifiée avec succès.');
     } else {
       // Create mode
-      if (uploadedFiles.length > 1) {
-        // Multi-add mode for a single chantier (project)
+      if (uploadedFiles.length > 0) {
+        // Uploaded files mode
         const chantierId = `chantier-${Date.now()}`;
+        const finalChantierName = formData.chantierName || 'Nouveau Chantier';
         uploadedFiles.forEach((file, index) => {
-          const photoTitle = file.title.trim() || `${formData.title} - ${index + 1}`;
+          const photoTitle = file.title.trim() || formData.title || `Photo ${index + 1}`;
           addPhotoToStorage({
             title: photoTitle,
-            category: formData.category,
-            chantierName: formData.chantierName,
-            location: formData.location,
-            description: formData.description,
+            category: formData.category || 'CHARPENTE BOIS',
+            chantierName: finalChantierName,
+            location: formData.location || 'La Réunion',
+            description: formData.description || '',
             url: file.url,
             chantierId: chantierId
           });
         });
-        setSuccessMessage(`✨ ${uploadedFiles.length} photos ajoutées avec succès pour le chantier "${formData.chantierName}".`);
+        setSuccessMessage(`✨ ${uploadedFiles.length} photo(s) ajoutée(s) avec succès pour le chantier "${finalChantierName}".`);
       } else {
-        // Single add mode
+        // Direct URL mode
         addPhotoToStorage({
-          ...formData,
+          title: formData.title || 'Nouvelle réalisation',
+          category: formData.category || 'CHARPENTE BOIS',
+          chantierName: formData.chantierName || 'Nouveau Chantier',
+          location: formData.location || 'La Réunion',
+          description: formData.description || '',
+          url: formData.url,
           chantierId: `chantier-${Date.now()}`
         });
         setSuccessMessage('Nouvelle photo de chantier ajoutée avec succès.');
@@ -454,7 +496,7 @@ export default function PageAdmin({ setCurrentPage, onPhotosUpdated }: PageAdmin
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="admin"
+                  placeholder="MTCRUN"
                   className="w-full px-4 py-3 bg-stone-50 border border-stone-200 font-sans text-sm focus:outline-none focus:ring-1 focus:ring-[#C5A059] focus:border-[#C5A059] rounded-none transition-all placeholder:text-stone-300"
                 />
               </div>
@@ -482,7 +524,7 @@ export default function PageAdmin({ setCurrentPage, onPhotosUpdated }: PageAdmin
             </form>
 
             <div className="pt-4 border-t border-stone-100 text-[10px] font-mono text-stone-400">
-              * Identifiant : <span className="font-bold text-stone-600">admin</span> | Mot de passe : <span className="font-bold text-stone-600">admin</span>
+              * Identifiant : <span className="font-bold text-stone-600">MTCRUN</span> | Mot de passe : <span className="font-bold text-stone-600">Mtcrun974@</span>
             </div>
           </div>
         </div>
@@ -506,8 +548,6 @@ export default function PageAdmin({ setCurrentPage, onPhotosUpdated }: PageAdmin
               </button>
             </div>
           )}
-
-
 
           {/* Admin Tabs Selector */}
           <div className="flex border-b border-stone-200 gap-2 overflow-x-auto">
@@ -574,7 +614,6 @@ export default function PageAdmin({ setCurrentPage, onPhotosUpdated }: PageAdmin
                   </label>
                   <input
                     type="text"
-                    required
                     name="title"
                     value={formData.title}
                     onChange={handleInputChange}
@@ -607,7 +646,6 @@ export default function PageAdmin({ setCurrentPage, onPhotosUpdated }: PageAdmin
                     </label>
                     <input
                       type="text"
-                      required
                       name="location"
                       value={formData.location}
                       onChange={handleInputChange}
@@ -624,7 +662,6 @@ export default function PageAdmin({ setCurrentPage, onPhotosUpdated }: PageAdmin
                   </label>
                   <input
                     type="text"
-                    required
                     name="chantierName"
                     value={formData.chantierName}
                     onChange={handleInputChange}
@@ -639,7 +676,6 @@ export default function PageAdmin({ setCurrentPage, onPhotosUpdated }: PageAdmin
                     Spécificités & Description de l'Ouvrage *
                   </label>
                   <textarea
-                    required
                     rows={4}
                     name="description"
                     value={formData.description}
@@ -710,24 +746,45 @@ export default function PageAdmin({ setCurrentPage, onPhotosUpdated }: PageAdmin
                   {/* List of uploaded files to import */}
                   {uploadedFiles.length > 0 && (
                     <div className="space-y-3 pt-2 bg-stone-50/50 border border-stone-200 p-4">
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-2">
                         <span className="block text-[10.5px] font-sans font-bold uppercase tracking-wider text-[#051a0f]">
                           Photos sélectionnées ({uploadedFiles.length})
                         </span>
-                        {!isEditing && (
+                        
+                        <div className="flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={() => {
-                              setUploadedFiles([]);
-                              setFileBase64('');
-                              setFormData(prev => ({ ...prev, url: '' }));
-                              if (fileInputRef.current) fileInputRef.current.value = '';
-                            }}
-                            className="text-[10px] uppercase font-bold tracking-wider text-red-600 hover:text-red-800 font-sans cursor-pointer"
+                            onClick={handleAIGenerate}
+                            disabled={isGeneratingAI}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1 text-[10px] uppercase font-bold tracking-wider font-sans border transition-all cursor-pointer ${
+                              isGeneratingAI 
+                                ? 'bg-indigo-50 border-indigo-200 text-indigo-400 cursor-not-allowed'
+                                : 'bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300'
+                            }`}
                           >
-                            Tout effacer
+                            {isGeneratingAI ? (
+                              <RefreshCw className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Wand2 className="w-3 h-3" />
+                            )}
+                            {isGeneratingAI ? 'Analyse IA...' : 'Analyse IA des photos'}
                           </button>
-                        )}
+                          
+                          {!isEditing && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setUploadedFiles([]);
+                                setFileBase64('');
+                                setFormData(prev => ({ ...prev, url: '' }));
+                                if (fileInputRef.current) fileInputRef.current.value = '';
+                              }}
+                              className="text-[10px] uppercase font-bold tracking-wider text-red-600 hover:text-red-800 font-sans cursor-pointer ml-2"
+                            >
+                              Tout effacer
+                            </button>
+                          )}
+                        </div>
                       </div>
                       
                       <div className="grid grid-cols-2 gap-3 max-h-[220px] overflow-y-auto pr-1">
@@ -1086,7 +1143,7 @@ export default function PageAdmin({ setCurrentPage, onPhotosUpdated }: PageAdmin
                                 <div key={pIdx} className="w-16 h-16 sm:w-20 sm:h-20 bg-stone-900 overflow-hidden border border-stone-200 relative group/photo">
                                   <img 
                                     src={photoUrl} 
-                                    alt={`Photo de projet client n°${pIdx + 1}`} 
+                                    alt={`Photo de projet client n°\${pIdx + 1}`} 
                                     className="w-full h-full object-cover group-hover/photo:scale-110 transition-transform duration-300"
                                     referrerPolicy="no-referrer"
                                   />

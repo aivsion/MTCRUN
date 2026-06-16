@@ -74,36 +74,6 @@ Chez MTC RUN CONSTRUCTION, nos charpentes fines, menuiseries d'exception et deck
         </div>
       </section>
 
-      {/* 3. CORE STATISTICS ACCENT */}
-      <section className="max-w-7xl mx-auto px-6 md:px-12 pt-10">
-        <div className="bg-white border border-stone-200/60 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-[#051a0f]/5 text-[#C5A059]">
-              <Compass className="w-5 h-5" />
-            </div>
-            <div className="text-left">
-              <span className="block font-sans text-[10px] tracking-widest text-[#C5A059] uppercase font-bold">EXCELLENCE CERTIFIÉE</span>
-              <span className="block font-sans text-xs text-stone-500">Chantiers durables conformes aux normes tropicales</span>
-            </div>
-          </div>
-          <div className="h-px md:h-10 w-full md:w-px bg-stone-200"></div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-12 text-center md:text-left">
-            <div>
-              <span className="block font-serif text-xl font-bold text-[#051a0f]">{photos.filter(p => p.category === 'CHARPENTE BOIS').length}</span>
-              <span className="block font-sans text-[9px] text-stone-500 uppercase tracking-wider font-semibold">Charpente Bois</span>
-            </div>
-            <div>
-              <span className="block font-serif text-xl font-bold text-[#051a0f]">{photos.filter(p => p.category === 'AMÉNAGEMENTS BOIS').length}</span>
-              <span className="block font-sans text-[9px] text-stone-500 uppercase tracking-wider font-semibold">Aménagements</span>
-            </div>
-            <div>
-              <span className="block font-serif text-xl font-bold text-[#051a0f]">{photos.filter(p => p.category === 'MENUISERIE BOIS').length}</span>
-              <span className="block font-sans text-[9px] text-stone-500 uppercase tracking-wider font-semibold">Menuiseries</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* 4. PHOTO GALLERY GRID */}
       <section className="py-12 max-w-7xl mx-auto px-6 md:px-12">
         {filteredPhotos.length === 0 ? (

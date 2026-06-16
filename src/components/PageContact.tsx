@@ -14,16 +14,28 @@ export default function PageContact() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.fullName || !formData.email || !formData.message) return;
 
     setIsSubmitting(true);
-    // Simulate premium submission experience
-    setTimeout(() => {
-      setIsSubmitting(false);
+    
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      
+      if (!response.ok) throw new Error("Erreur d'envoi");
+      
       setIsSubmitted(true);
-    }, 1500);
+    } catch (e) {
+      console.error(e);
+      alert("Une erreur s'est produite lors de l'envoi de votre message. Veuillez réessayer plus tard ou nous appeler directement.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
