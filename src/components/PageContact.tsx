@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import emailjs from '@emailjs/browser';
 import { DIRIGEANT_PORTRAIT, MAP_PIN_URL } from '../data';
 import { Phone, Mail, MapPin, Send, CheckCircle } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -21,18 +22,38 @@ export default function PageContact() {
     setIsSubmitting(true);
     
     try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+      // 1. Sauvegarde dans Firestore pour l'interface Admin
+      const { addContactMessage } = await import('../utils/contactStorage');
+      await addContactMessage({
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        projectType: formData.projectType,
+        message: formData.message
       });
       
-      if (!response.ok) throw new Error("Erreur d'envoi");
+      // 2. Envoi de l'email via EmailJS
+      await emailjs.send(
+        'service_kzcex7i', // Service ID
+        'template_k68qysi', // Template ID
+        {
+          from_name: formData.fullName,
+          reply_to: formData.email,
+          phone: formData.phone,
+          project_type: formData.projectType,
+          message: formData.message,
+          user_email: formData.email,
+          fullName: formData.fullName,
+          email: formData.email,
+          projectType: formData.projectType
+        },
+        'GxsyNzCSVq4HpHDU6' // Public Key
+      );
       
       setIsSubmitted(true);
     } catch (e) {
       console.error(e);
-      alert("Une erreur s'est produite lors de l'envoi de votre message. Veuillez réessayer plus tard ou nous appeler directement.");
+      alert("Une erreur s'est produite lors de l'envoi de votre message. Veuillez vérifier votre configuration EmailJS.");
     } finally {
       setIsSubmitting(false);
     }

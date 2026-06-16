@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import emailjs from '@emailjs/browser';
 import { testimonials } from '../data';
 import { Testimonial } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
@@ -208,13 +209,20 @@ export default function Testimonials() {
         setIsFormOpen(false);
       }, 4500);
 
-      // Send notification to admin
+      // Send notification via EmailJS
       try {
-        await fetch('/api/notify-testimonial', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newTestimonial)
-        });
+        await emailjs.send(
+          'service_kzcex7i', // Service ID
+          'template_l9e3xjl', // Template ID
+          {
+            client_name: newTestimonial.clientName,
+            project_type: newTestimonial.projectType,
+            city: newTestimonial.city,
+            comment: newTestimonial.comment,
+            rating: newTestimonial.rating
+          },
+          'GxsyNzCSVq4HpHDU6' // Public Key
+        );
       } catch (e) {
         console.error("Failed to send notification email", e);
       }

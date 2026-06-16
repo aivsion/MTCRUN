@@ -18,7 +18,8 @@ export const MAP_PIN_URL = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.or
 
 export const HERO_ACCUEIL_BG = HERO_ACCUEIL_BG_IMG;
 
-export const DETAIL_ARCHITECTURAL_IMG = "https://lh3.googleusercontent.com/aida-public/AB6AXuD0XBOaKzIrDv3nEyRt8m9GY39KoTrd43XTZZu2Nacw2h1grG_b93bkq3YoxFpqyJizRgKHGiJQVXyvowCMyhCQfCIihrWXTlrVwD0kTC8A6ZaJiM23Qv4LrTrNEvpNQCgidVJ4HN3S2qFQtrWxz_9EsLgB_QJQVDm5RgOBOKBpyyca86ryYV6pDxpSMSRew1Ad0tguFcmk7T4-RaCrvOsobOd74G5Ajde_46FO0HYssqFYT8QBy0xUC1s1CKgQl5PNJMTrPHDu2hQ";
+import REGEN_IMAGE_NEW_DETAIL from './assets/images/regenerated_image_1781634092670.jpg';
+export const DETAIL_ARCHITECTURAL_IMG = REGEN_IMAGE_NEW_DETAIL;
 
 export const engagements: Engagement[] = [
   {

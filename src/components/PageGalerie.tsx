@@ -23,7 +23,7 @@ export default function PageGalerie({ openModal, photos }: PageGalerieProps) {
     ? photos
     : photos.filter(p => p.category === activeFilter);
 
-  const handleDiscoverPhoto = (photo: GalleryPhoto) => {
+  const handleDiscoverPhoto = (photo: GalleryPhoto, index: number) => {
     let details = '';
     if (photo.location) details += `📍 Localisation : ${photo.location}\n`;
     if (photo.chantierName) details += `🏗️ Projet : ${photo.chantierName}\n`;
@@ -34,7 +34,26 @@ export default function PageGalerie({ openModal, photos }: PageGalerieProps) {
     const firstImage = (photo.urls && photo.urls.length > 0) ? photo.urls[0] : (photo.url || undefined);
     const allUrls = (photo.urls && photo.urls.length > 0) ? photo.urls : (photo.url ? [photo.url] : []);
     
-    openModal(photo.title, details, firstImage, photo.category, photo.chantierId, allUrls);
+    openModal(
+      photo.title, 
+      details, 
+      firstImage, 
+      photo.category, 
+      photo.chantierId, 
+      allUrls,
+      {
+        index,
+        total: filteredPhotos.length,
+        onNext: () => {
+          const nextIndex = (index + 1) % filteredPhotos.length;
+          handleDiscoverPhoto(filteredPhotos[nextIndex], nextIndex);
+        },
+        onPrev: () => {
+          const prevIndex = (index - 1 + filteredPhotos.length) % filteredPhotos.length;
+          handleDiscoverPhoto(filteredPhotos[prevIndex], prevIndex);
+        }
+      }
+    );
   };
 
   return (
@@ -88,7 +107,7 @@ export default function PageGalerie({ openModal, photos }: PageGalerieProps) {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <AnimatePresence mode="popLayout">
-              {filteredPhotos.map((photo) => (
+              {filteredPhotos.map((photo, index) => (
                 <motion.div
                   layout
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -96,7 +115,7 @@ export default function PageGalerie({ openModal, photos }: PageGalerieProps) {
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.4 }}
                   key={photo.id}
-                  onClick={() => handleDiscoverPhoto(photo)}
+                  onClick={() => handleDiscoverPhoto(photo, index)}
                   className="group relative aspect-[4/3] bg-stone-150 overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 border border-stone-200/40 hover:border-[#C5A059]/30 flex flex-col justify-end"
                 >
                   <img

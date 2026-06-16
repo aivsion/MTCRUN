@@ -70,6 +70,12 @@ export default function App() {
     category?: string;
     chantierId?: string;
     imageUrls?: string[];
+    galleryNav?: {
+      onNext: () => void;
+      onPrev: () => void;
+      index: number;
+      total: number;
+    };
   }>({
     isOpen: false,
     title: '',
@@ -128,7 +134,15 @@ export default function App() {
     }));
   };
 
-  const openModal = (title: string, content: string, imageUrl?: string, category?: string, chantierId?: string, imageUrls?: string[]) => {
+  const openModal = (
+    title: string, 
+    content: string, 
+    imageUrl?: string, 
+    category?: string, 
+    chantierId?: string, 
+    imageUrls?: string[],
+    galleryNav?: { onNext: () => void; onPrev: () => void; index: number; total: number; }
+  ) => {
     setModalData({
       isOpen: true,
       title,
@@ -136,7 +150,8 @@ export default function App() {
       imageUrl,
       category,
       chantierId,
-      imageUrls
+      imageUrls,
+      galleryNav
     });
   };
 
@@ -263,10 +278,31 @@ export default function App() {
                   {modalData.content}
                 </div>
 
-                <div className="pt-4 flex justify-end">
+                <div className="pt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+                  {modalData.galleryNav ? (
+                    <div className="flex items-center gap-4">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); modalData.galleryNav?.onPrev(); }} 
+                        className="p-2 border border-stone-200 text-stone-500 hover:text-[#C5A059] hover:border-[#C5A059] transition-all cursor-pointer rounded-full bg-stone-50"
+                        title="Projet précédent"
+                      >
+                        <ChevronLeft className="w-5 h-5"/>
+                      </button>
+                      <span className="text-xs font-sans text-stone-500 tracking-widest font-medium">
+                        {modalData.galleryNav.index + 1} / {modalData.galleryNav.total}
+                      </span>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); modalData.galleryNav?.onNext(); }} 
+                        className="p-2 border border-stone-200 text-stone-500 hover:text-[#C5A059] hover:border-[#C5A059] transition-all cursor-pointer rounded-full bg-stone-50"
+                        title="Projet suivant"
+                      >
+                        <ChevronRight className="w-5 h-5"/>
+                      </button>
+                    </div>
+                  ) : <div />}
                   <button
                     onClick={closeModal}
-                    className="bg-[#051a0f] hover:bg-[#C5A059] text-white hover:text-[#051a0f] font-sans text-xs tracking-widest uppercase font-semibold px-6 py-3.5 transition-colors duration-300 flex items-center gap-2 cursor-pointer border border-transparent hover:border-[#051a0f]"
+                    className="w-full sm:w-auto justify-center bg-[#051a0f] hover:bg-[#C5A059] text-white hover:text-[#051a0f] font-sans text-xs tracking-widest uppercase font-semibold px-6 py-3.5 transition-colors duration-300 flex items-center gap-2 cursor-pointer border border-transparent hover:border-[#051a0f]"
                   >
                     <span>Fermer la fenêtre</span>
                     <Check className="w-4 h-4" />
@@ -275,6 +311,26 @@ export default function App() {
               </div>
             </div>
           </div>
+
+          {/* Navigation Arrows for Gallery Projects (Desktop outer floating arrows) */}
+          {modalData.galleryNav && (
+            <>
+              <button
+                onClick={(e) => { e.stopPropagation(); modalData.galleryNav?.onPrev(); }}
+                className="hidden md:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-4 z-20 cursor-pointer bg-white/10 hover:bg-[#C5A059] rounded-full transition-all border border-white/20 hover:border-[#C5A059] hover:shadow-[0_0_20px_rgba(197,160,89,0.4)]"
+                aria-label="Projet précédent"
+              >
+                <ChevronLeft className="w-8 h-8" />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); modalData.galleryNav?.onNext(); }}
+                className="hidden md:flex absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-4 z-20 cursor-pointer bg-white/10 hover:bg-[#C5A059] rounded-full transition-all border border-white/20 hover:border-[#C5A059] hover:shadow-[0_0_20px_rgba(197,160,89,0.4)]"
+                aria-label="Projet suivant"
+              >
+                <ChevronRight className="w-8 h-8" />
+              </button>
+            </>
+          )}
         </div>
       )}
 

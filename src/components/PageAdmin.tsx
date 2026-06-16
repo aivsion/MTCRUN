@@ -34,7 +34,8 @@ import {
   EyeOff,
   Star,
   CheckCircle2,
-  Wand2
+  Wand2,
+  Mail
 } from 'lucide-react';
 
 interface PageAdminProps {
@@ -106,15 +107,19 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
   const [successMessage, setSuccessMessage] = useState('');
 
   // Active Tab state
-  const [activeTab, setActiveTab] = useState<'photos' | 'testimonials'>('photos');
+  const [activeTab, setActiveTab] = useState<'photos' | 'testimonials' | 'messages'>('photos');
 
   // Testimonials state
   const [testimonialsList, setTestimonialsList] = useState<Testimonial[]>([]);
+  
+  // Contacts state
+  const [contactsList, setContactsList] = useState<any[]>([]);
 
-  // Load photos and testimonials on mount / auth change
+  // Load photos, testimonials, and contacts on mount / auth change
   useEffect(() => {
     let unsubPhotos: any;
     let unsubTestimonials: any;
+    let unsubContacts: any;
 
     if (isAuthenticated) {
       unsubPhotos = subscribeToGalleryPhotos((data) => {
@@ -123,14 +128,22 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
       unsubTestimonials = subscribeToAdminTestimonials((data) => {
         setTestimonialsList(data);
       });
+      // Need dynamic import to avoid breaking sync if module is missing, but static is better. We'll import it at top later or use then()
+      import('../utils/contactStorage').then(module => {
+        unsubContacts = module.subscribeToContacts((data) => {
+          setContactsList(data);
+        });
+      });
     } else {
       setPhotos([]);
       setTestimonialsList([]);
+      setContactsList([]);
     }
 
     return () => {
       if (unsubPhotos) unsubPhotos();
       if (unsubTestimonials) unsubTestimonials();
+      if (unsubContacts) unsubContacts();
     };
   }, [isAuthenticated]);
 
@@ -585,6 +598,26 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
                 </span>
               )}
             </button>
+            <button
+              onClick={() => setActiveTab('messages')}
+              className={`pb-4 px-6 font-sans text-xs uppercase tracking-widest font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 relative whitespace-nowrap ${
+                activeTab === 'messages'
+                  ? 'border-[#051a0f] text-[#051a0f]'
+                  : 'border-transparent text-stone-400 hover:text-stone-600'
+              }`}
+            >
+              <Mail className="w-4 h-4" />
+              <span>Messagerie</span>
+              {contactsList.filter(c => !c.read).length > 0 ? (
+                <span className="bg-[#C5A059] text-white text-[9px] font-sans font-extrabold px-1.5 py-0.5 ml-1 rounded-full">
+                  {contactsList.filter(c => !c.read).length} NOUVEAUX
+                </span>
+              ) : (
+                <span className="bg-stone-100 text-stone-500 text-[10px] font-sans font-extrabold px-2 py-0.5 ml-1">
+                  {contactsList.length}
+                </span>
+              )}
+            </button>
           </div>
 
           {activeTab === 'photos' ? (
@@ -1026,7 +1059,7 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
               )}
             </div>
           </div>
-        ) : (
+        ) : activeTab === 'testimonials' ? (
           /* Testimonial moderation interface */
           <div className="space-y-8 animate-fadeIn">
             {/* Header card inside moderation tab */}
@@ -1173,7 +1206,120 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
               </div>
             )}
           </div>
-        )}
+        ) : activeTab === 'messages' ? (
+          /* Messages interface */
+          <div className="space-y-8 animate-fadeIn">
+            <div className="bg-white border border-stone-200 p-6 md:p-8 space-y-4 relative">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-[#C5A059]"></div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <h3 className="font-serif text-2xl font-bold text-[#051a0f]">
+                    Messagerie & Contacts
+                  </h3>
+                  <p className="font-sans text-xs text-stone-500">
+                    Voici les demandes de contact envoyées depuis votre site.
+                  </p>
+                </div>
+                <div className="flex gap-2.5 text-xs font-sans font-bold flex-wrap">
+                  <span className="bg-[#C5A059] text-white px-3 py-1 border border-[#C5A059]">
+                    {contactsList.filter(c => !c.read).length} Nouveaux
+                  </span>
+                  <span className="bg-stone-50 text-stone-600 px-3 py-1 border border-stone-200">
+                    {contactsList.length} Total
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {contactsList.length === 0 ? (
+              <div className="bg-stone-50 border border-stone-200 border-dashed p-12 text-center text-stone-500 font-sans text-sm">
+                Aucun message reçu pour le moment.
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {contactsList.map((contact) => (
+                  <div 
+                    key={contact.id} 
+                    className={`bg-white border p-6 flex flex-col md:flex-row md:items-start justify-between gap-6 transition-all shadow-sm ${
+                      !contact.read ? 'border-[#C5A059]/40 shadow-[#C5A059]/5' : 'border-stone-200'
+                    }`}
+                  >
+                    <div className="flex-grow space-y-4 text-left">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="flex items-center gap-3 mb-1">
+                            {!contact.read && (
+                              <span className="w-2 h-2 rounded-full bg-[#C5A059] animate-pulse"></span>
+                            )}
+                            <h4 className="font-serif font-bold text-lg text-[#051a0f]">{contact.fullName}</h4>
+                          </div>
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 font-sans text-xs text-stone-500">
+                            <span className="font-medium text-[#051a0f]">{contact.email}</span>
+                            <span>•</span>
+                            <span className="font-mono">{contact.phone}</span>
+                          </div>
+                        </div>
+                        <span className="font-sans text-[10px] text-stone-400 font-medium tracking-wider whitespace-nowrap hidden sm:block">
+                          {new Date(contact.createdAt).toLocaleDateString()} {new Date(contact.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </span>
+                      </div>
+                      
+                      <div className="inline-block px-3 py-1 bg-stone-50 border border-stone-200 font-sans text-[10px] font-bold uppercase tracking-widest text-[#C5A059]">
+                        {contact.projectType}
+                      </div>
+
+                      <div className="bg-stone-50 p-4 font-sans text-sm text-[#051a0f] whitespace-pre-line leading-relaxed border-l-2 border-[#C5A059]/30">
+                        {contact.message}
+                      </div>
+                      
+                      <span className="font-sans text-[10px] text-stone-400 font-medium tracking-wider block sm:hidden">
+                        {new Date(contact.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-row md:flex-col justify-end gap-2 shrink-0 md:w-40 border-t md:border-t-0 border-stone-100 pt-4 md:pt-0 mt-4 md:mt-0">
+                      {!contact.read ? (
+                        <button
+                          onClick={async () => {
+                            const { markContactMessageAsRead } = await import('../utils/contactStorage');
+                            await markContactMessageAsRead(contact.id, true);
+                          }}
+                          className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 bg-[#051a0f] hover:bg-[#C5A059] text-white py-2 px-3 text-[10px] font-bold uppercase font-sans tracking-wide transition-all border border-transparent"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Marquer lu</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={async () => {
+                            const { markContactMessageAsRead } = await import('../utils/contactStorage');
+                            await markContactMessageAsRead(contact.id, false);
+                          }}
+                          className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 bg-stone-100 hover:bg-stone-200 text-stone-600 py-2 px-3 text-[10px] font-bold uppercase font-sans tracking-wide transition-all border border-transparent"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Non lu</span>
+                        </button>
+                      )}
+                      <button
+                        onClick={async () => {
+                          if (window.confirm("Supprimer ce message définitivement ?")) {
+                            const { deleteContactMessage } = await import('../utils/contactStorage');
+                            await deleteContactMessage(contact.id);
+                          }
+                        }}
+                        className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white py-2 px-3 text-[10px] font-bold uppercase font-sans tracking-wide transition-all border border-rose-100 hover:border-transparent"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Supprimer</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : null}
       </div>
     )}
     </div>
