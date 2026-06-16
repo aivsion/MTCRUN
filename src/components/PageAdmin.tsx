@@ -253,27 +253,18 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
     });
 
     Promise.all(promises).then(results => {
-      if (isEditing) {
-        // In editing mode, replace/set the single file
-        if (results.length > 0) {
-          setFileBase64(results[0].url);
-          setFormData(prev => ({ ...prev, url: results[0].url }));
-          setUploadedFiles([results[0]]);
-        }
-      } else {
-        // In add mode, append/set multiple files!
-        setUploadedFiles(prev => {
-          const next = [...prev, ...results];
-          return next;
-        });
-        if (results.length > 0) {
-          setFormData(prev => ({ 
-            ...prev, 
-            url: results[0].url,
-            title: prev.title || results[0].title
-          }));
-          setFileBase64(results[0].url);
-        }
+      // In both editing mode and add mode, append files so existing photos are kept
+      setUploadedFiles(prev => {
+        const next = [...prev, ...results];
+        return next;
+      });
+      if (results.length > 0) {
+        setFormData(prev => ({ 
+          ...prev, 
+          url: prev.url || results[0].url,
+          title: prev.title || results[0].title
+        }));
+        setFileBase64(results[0].url);
       }
     }).catch(err => {
       console.error('Failure reading files:', err);
@@ -323,6 +314,10 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
     }
 
     try {
+      const finalUrls = uploadedFiles.length > 0 
+        ? uploadedFiles.map(f => f.url) 
+        : (formData.url ? [formData.url] : (editingPhoto?.urls || []));
+
       if (isEditing && editingPhoto) {
         // Edit mode
         const updated: GalleryPhoto = {
@@ -332,49 +327,37 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
           chantierName: formData.chantierName || 'Nouveau Chantier',
           location: formData.location || 'La Réunion',
           description: formData.description || '',
-          urls: uploadedFiles.length > 0 ? uploadedFiles.map(f => f.url) : editingPhoto.urls
+          urls: finalUrls.length > 0 ? finalUrls : editingPhoto.urls
         };
         await updatePhotoInStorage(updated);
         setSuccessMessage('Photo de chantier modifiée avec succès.');
       } else {
         // Create mode
+        const finalChantierName = formData.chantierName || 'Nouveau Chantier';
+        const chantierId = `chantier-${Date.now()}`;
+        
+        await addPhotoToStorage({
+          title: formData.title || 'Nouvelle réalisation',
+          category: formData.category || 'CHARPENTE BOIS',
+          chantierName: finalChantierName,
+          location: formData.location || 'La Réunion',
+          description: formData.description || '',
+          urls: finalUrls,
+          chantierId: chantierId
+        });
+        
         if (uploadedFiles.length > 0) {
-          // Uploaded files mode
-          const chantierId = `chantier-${Date.now()}`;
-          const finalChantierName = formData.chantierName || 'Nouveau Chantier';
-          
-          await addPhotoToStorage({
-            title: formData.title || 'Nouvelle réalisation',
-            category: formData.category || 'CHARPENTE BOIS',
-            chantierName: finalChantierName,
-            location: formData.location || 'La Réunion',
-            description: formData.description || '',
-            urls: uploadedFiles.map(f => f.url),
-            chantierId: chantierId
-          });
-          
           setSuccessMessage(`✨ Chantier "${finalChantierName}" avec ${uploadedFiles.length} photo(s) ajouté avec succès.`);
         } else {
-          // Direct URL mode (fallback if URL was manual - but wait, we only support urls array now)
-          await addPhotoToStorage({
-            title: formData.title || 'Nouvelle réalisation',
-            category: formData.category || 'CHARPENTE BOIS',
-            chantierName: formData.chantierName || 'Nouveau Chantier',
-            location: formData.location || 'La Réunion',
-            description: formData.description || '',
-            urls: formData.url ? [formData.url] : [],
-            chantierId: `chantier-${Date.now()}`
-          });
           setSuccessMessage('Nouvelle photo de chantier ajoutée avec succès.');
         }
       }
 
       // Reset Form & state
       resetForm();
-      // Note: we can't reliably load getStoredPhotos if it hasn't synced, but we use subscription
       setTimeout(() => setSuccessMessage(''), 4000);
     } catch (err: any) {
-      alert("Erreur: L'image est peut-être trop lourde pour être sauvegardée ou réseau indisponible. " + err.message);
+      alert("Erreur: L'image est peut-être trop lourde pour être sauvegardée. " + err.message);
       console.error(err);
     }
   };
@@ -401,11 +384,11 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
     setIsEditing(true);
     setEditingPhoto(photo);
     setFormData({
-      title: photo.title,
+      title: photo.title || '',
       category: photo.category,
-      chantierName: photo.chantierName,
-      location: photo.location,
-      description: photo.description,
+      chantierName: photo.chantierName || '',
+      location: photo.location || '',
+      description: photo.description || '',
       url: (photo.urls && photo.urls.length > 0) ? photo.urls[0] : (photo.url || '')
     });
     setFileBase64('');
@@ -785,20 +768,18 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
                         </span>
                         
                         <div className="flex items-center gap-2">
-                          {!isEditing && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setUploadedFiles([]);
-                                setFileBase64('');
-                                setFormData(prev => ({ ...prev, url: '' }));
-                                if (fileInputRef.current) fileInputRef.current.value = '';
-                              }}
-                              className="text-[10px] uppercase font-bold tracking-wider text-red-600 hover:text-red-800 font-sans cursor-pointer ml-2"
-                            >
-                              Tout effacer
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setUploadedFiles([]);
+                              setFileBase64('');
+                              setFormData(prev => ({ ...prev, url: '' }));
+                              if (fileInputRef.current) fileInputRef.current.value = '';
+                            }}
+                            className="text-[10px] uppercase font-bold tracking-wider text-red-600 hover:text-red-800 font-sans cursor-pointer ml-2"
+                          >
+                            Tout effacer
+                          </button>
                         </div>
                       </div>
                       

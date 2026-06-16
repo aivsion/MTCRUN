@@ -1,13 +1,34 @@
 import { domains, DETAIL_ARCHITECTURAL_IMG } from '../data';
-import { Layers, TreePine, Building2, Home, Check, Hammer, Briefcase } from 'lucide-react';
+import { Layers, TreePine, Building2, Home, Check, Hammer, Briefcase, ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Page } from '../types';
 
 interface PagePrestationsProps {
   setCurrentPage: (page: Page) => void;
+  setGalleryFilter?: (filter: 'TOUTES' | 'CHARPENTE BOIS' | 'AMÉNAGEMENTS BOIS' | 'MENUISERIE BOIS') => void;
 }
 
-export default function PagePrestations({ setCurrentPage }: PagePrestationsProps) {
+export default function PagePrestations({ setCurrentPage, setGalleryFilter }: PagePrestationsProps) {
+  const getGalleryFilterForDomain = (id: string): 'TOUTES' | 'CHARPENTE BOIS' | 'AMÉNAGEMENTS BOIS' | 'MENUISERIE BOIS' => {
+    switch (id) {
+      case 'menuiserie-bois':
+        return 'MENUISERIE BOIS';
+      case 'amenagement-bois':
+        return 'AMÉNAGEMENTS BOIS';
+      case 'charpente-bois':
+        return 'CHARPENTE BOIS';
+      default:
+        return 'TOUTES';
+    }
+  };
+
+  const handleViewGallery = (id: string) => {
+    if (setGalleryFilter) {
+      setGalleryFilter(getGalleryFilterForDomain(id));
+    }
+    setCurrentPage('galerie');
+  };
+
   const getIcon = (id: string) => {
     switch (id) {
       case 'menuiserie-bois':
@@ -70,6 +91,16 @@ export default function PagePrestations({ setCurrentPage }: PagePrestationsProps
                 <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm border border-[#C5A059]/30 text-[#051a0f] font-serif font-bold text-xs px-3 py-1.5 shadow-sm">
                   {domain.number}
                 </div>
+                
+                {/* Petit bouton "voir plus" persistant sur l'image */}
+                <button
+                  type="button"
+                  onClick={() => handleViewGallery(domain.id)}
+                  className="absolute bottom-4 right-4 bg-white/95 hover:bg-[#C5A059] text-[#051a0f] hover:text-white font-sans text-[10px] font-bold tracking-wider uppercase px-3 py-2 border border-[#C5A059]/35 shadow-md flex items-center gap-1 cursor-pointer z-10 transition-all duration-300 active:scale-95 animate-fadeIn"
+                >
+                  Voir plus
+                  <ArrowRight className="w-3 h-3" />
+                </button>
               </div>
 
               {/* Text side */}
@@ -88,17 +119,31 @@ export default function PagePrestations({ setCurrentPage }: PagePrestationsProps
                   </p>
                 </div>
 
-                {/* Elegant gold bullets list */}
-                <div className="space-y-3 pt-4 border-t border-gray-100">
-                  <span className="block font-sans text-[10px] tracking-widest text-[#C5A059] uppercase font-bold mb-2">Prestations incluses</span>
-                  <ul className="grid grid-cols-1 gap-2.5">
-                    {domain.bullets.map((bullet, bIdx) => (
-                      <li key={bIdx} className="flex items-start gap-2 text-stone-700 text-sm font-light">
-                        <Check className="w-4 h-4 text-[#C5A059] mt-0.5 flex-shrink-0" />
-                        <span className="font-sans">{bullet}</span>
-                      </li>
-                    ))}
-                  </ul>
+                {/* Elegant gold bullets list & View gallery link */}
+                <div className="space-y-4 pt-4 border-t border-gray-100 flex flex-col justify-between h-full">
+                  <div>
+                    <span className="block font-sans text-[10px] tracking-widest text-[#C5A059] uppercase font-bold mb-2">Prestations incluses</span>
+                    <ul className="grid grid-cols-1 gap-2.5">
+                      {domain.bullets.map((bullet, bIdx) => (
+                        <li key={bIdx} className="flex items-start gap-2 text-stone-700 text-sm font-light">
+                          <Check className="w-4 h-4 text-[#C5A059] mt-0.5 flex-shrink-0" />
+                          <span className="font-sans">{bullet}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Lien élégant vers réalisations */}
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={() => handleViewGallery(domain.id)}
+                      className="inline-flex items-center gap-1.5 bg-[#051a0f]/5 hover:bg-[#051a0f] text-[#051a0f] hover:text-[#C5A059] font-sans text-[10px] font-bold tracking-widest uppercase px-4 py-2.5 border border-stone-200 hover:border-[#051a0f] transition-all duration-300 cursor-pointer w-full justify-center md:w-auto"
+                    >
+                      <span>Découvrir nos réalisations</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </motion.div>

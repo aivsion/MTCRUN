@@ -9,7 +9,7 @@ export default function PageContact() {
     fullName: '',
     email: '',
     phone: '',
-    projectType: 'Maçonnerie Technique',
+    projectType: 'Menuiserie Bois',
     message: ''
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -35,17 +35,13 @@ export default function PageContact() {
       // 2. Envoi de l'email via EmailJS
       await emailjs.send(
         'service_kzcex7i', // Service ID
-        'template_k68qysi', // Template ID
+        'template_l9e3xjl', // Template ID
         {
-          from_name: formData.fullName,
-          reply_to: formData.email,
-          phone: formData.phone,
-          project_type: formData.projectType,
-          message: formData.message,
-          user_email: formData.email,
-          fullName: formData.fullName,
-          email: formData.email,
-          projectType: formData.projectType
+          nom_complet: formData.fullName,
+          adresse_email: formData.email,
+          telephone: formData.phone,
+          type_projet: formData.projectType,
+          description_vision: formData.message
         },
         'GxsyNzCSVq4HpHDU6' // Public Key
       );
@@ -214,7 +210,7 @@ export default function PageContact() {
                             fullName: '',
                             email: '',
                             phone: '',
-                            projectType: 'Maçonnerie Technique',
+                            projectType: 'Menuiserie Bois',
                             message: ''
                           });
                         }}
@@ -297,7 +293,7 @@ export default function PageContact() {
                           className="w-full font-sans text-sm border-b border-gray-200 focus:border-[#C5A059] py-3 focus:outline-none bg-transparent transition-colors duration-300 cursor-pointer text-gray-700 font-light"
                         >
                           <option value="Menuiserie Bois">Menuiserie Bois</option>
-                          <option value="Charpente/Bois">Charpente / Ossature Bois</option>
+                          <option value="Charpente / Ossature Bois">Charpente / Ossature Bois</option>
                           <option value="Aménagement Bois">Aménagement Bois</option>
                           <option value="Rénovation">Rénovation</option>
                           <option value="Autre">Autre Projet</option>

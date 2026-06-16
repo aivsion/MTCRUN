@@ -6,10 +6,20 @@ import { GalleryPhoto } from '../types';
 interface PageGalerieProps {
   openModal: (title: string, content: string, imageUrl?: string, category?: string, chantierId?: string, imageUrls?: string[]) => void;
   photos: GalleryPhoto[];
+  activeFilter?: 'TOUTES' | 'CHARPENTE BOIS' | 'AMÉNAGEMENTS BOIS' | 'MENUISERIE BOIS';
+  setActiveFilter?: (filter: 'TOUTES' | 'CHARPENTE BOIS' | 'AMÉNAGEMENTS BOIS' | 'MENUISERIE BOIS') => void;
 }
 
-export default function PageGalerie({ openModal, photos }: PageGalerieProps) {
-  const [activeFilter, setActiveFilter] = useState<'TOUTES' | 'CHARPENTE BOIS' | 'AMÉNAGEMENTS BOIS' | 'MENUISERIE BOIS'>('TOUTES');
+export default function PageGalerie({ 
+  openModal, 
+  photos,
+  activeFilter: propActiveFilter,
+  setActiveFilter: propSetActiveFilter
+}: PageGalerieProps) {
+  const [localActiveFilter, setLocalActiveFilter] = useState<'TOUTES' | 'CHARPENTE BOIS' | 'AMÉNAGEMENTS BOIS' | 'MENUISERIE BOIS'>('TOUTES');
+
+  const activeFilter = propActiveFilter !== undefined ? propActiveFilter : localActiveFilter;
+  const setActiveFilter = propSetActiveFilter !== undefined ? propSetActiveFilter : setLocalActiveFilter;
 
   const filters: ('TOUTES' | 'CHARPENTE BOIS' | 'AMÉNAGEMENTS BOIS' | 'MENUISERIE BOIS')[] = [
     'TOUTES',

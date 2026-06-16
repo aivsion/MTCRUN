@@ -105,11 +105,11 @@ export const domains: Domain[] = [
     description: "Une offre globale d'envergure réunissant nos métiers d'excellence (Menuiserie, Aménagement & Charpente BOIS) au service des logements collectifs ainsi que des bâtiments industriels et commerciaux.",
     bullets: [
       "Logements collectifs",
-      "Bâtiments industriels",
-      "Bâtiments commerciaux",
+      "Bâtiments professionnels en bois",
+      "Agencements commerciaux",
       "Synergie Menuiserie, Aménagement & Charpente"
     ],
-    imageUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80"
+    imageUrl: REGEN_IMAGE_1781503644557
   }
 ];
 

@@ -213,13 +213,16 @@ export default function Testimonials() {
       try {
         await emailjs.send(
           'service_kzcex7i', // Service ID
-          'template_l9e3xjl', // Template ID
+          'template_k68qysi', // Template ID
           {
-            client_name: newTestimonial.clientName,
-            project_type: newTestimonial.projectType,
-            city: newTestimonial.city,
-            comment: newTestimonial.comment,
-            rating: newTestimonial.rating
+            votre_nom: newTestimonial.clientName,
+            type_prestation: newTestimonial.projectType,
+            ville: newTestimonial.city,
+            region: newTestimonial.region,
+            pays: newTestimonial.country,
+            date_livraison: newTestimonial.period,
+            votre_evaluation: newTestimonial.rating,
+            votre_message: newTestimonial.comment
           },
           'GxsyNzCSVq4HpHDU6' // Public Key
         );

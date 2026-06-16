@@ -14,6 +14,7 @@ import { X, Check, ChevronLeft, ChevronRight, Maximize } from 'lucide-react';
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('accueil');
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
+  const [galleryFilter, setGalleryFilter] = useState<'TOUTES' | 'CHARPENTE BOIS' | 'AMÉNAGEMENTS BOIS' | 'MENUISERIE BOIS'>('TOUTES');
 
   // Synchronize dynamic gallery photos from Firebase
   useEffect(() => {
@@ -171,9 +172,9 @@ export default function App() {
       case 'accueil':
         return <PageAccueil setCurrentPage={setCurrentPage} />;
       case 'prestations':
-        return <PagePrestations setCurrentPage={setCurrentPage} />;
+        return <PagePrestations setCurrentPage={setCurrentPage} setGalleryFilter={setGalleryFilter} />;
       case 'galerie':
-        return <PageGalerie openModal={openModal} photos={photos} />;
+        return <PageGalerie openModal={openModal} photos={photos} activeFilter={galleryFilter} setActiveFilter={setGalleryFilter} />;
       case 'contact':
         return <PageContact />;
       case 'admin':
