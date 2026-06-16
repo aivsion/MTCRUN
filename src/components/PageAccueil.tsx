@@ -1,7 +1,7 @@
 import { DIRIGEANT_PORTRAIT, HERO_ACCUEIL_BG, engagements } from '../data';
 import { Page } from '../types';
 import { motion } from 'motion/react';
-import { Leaf, Cpu, Timer, ArrowRight, GraduationCap, FileText, ShieldCheck, ExternalLink } from 'lucide-react';
+import { Leaf, Cpu, Timer, ArrowRight, GraduationCap, FileText, ShieldCheck, ExternalLink, TreePine } from 'lucide-react';
 import ECHOBAT_LOGO from '../assets/images/regenerated_image_1781250096754.png';
 import Testimonials from './Testimonials';
 

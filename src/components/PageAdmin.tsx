@@ -4,7 +4,8 @@ import {
   addPhotoToStorage, 
   updatePhotoInStorage, 
   deletePhotoFromStorage,
-  subscribeToGalleryPhotos
+  subscribeToGalleryPhotos,
+  clearAllPhotosFromStorage
 } from '../utils/galleryStorage';
 import {
   toggleTestimonialApproval,
@@ -35,7 +36,9 @@ import {
   Star,
   CheckCircle2,
   Wand2,
-  Mail
+  Mail,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 
 interface PageAdminProps {
@@ -86,6 +89,83 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
 
   // Multi-files state
   const [uploadedFiles, setUploadedFiles] = useState<Array<{ url: string; title: string; filename: string }>>([]);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+  const handleFileDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleFileDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+  };
+
+  const handleFileDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === targetIndex) return;
+
+    const nextFiles = [...uploadedFiles];
+    const [draggedItem] = nextFiles.splice(draggedIndex, 1);
+    nextFiles.splice(targetIndex, 0, draggedItem);
+    
+    setUploadedFiles(nextFiles);
+    
+    if (nextFiles.length > 0) {
+      setFileBase64(nextFiles[0].url);
+      setFormData(prev => ({
+        ...prev,
+        url: nextFiles[0].url,
+        title: prev.title === (uploadedFiles[0]?.title || '') ? nextFiles[0].title : prev.title
+      }));
+    }
+  };
+
+  const handleFileDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
+  const handleMoveFile = (index: number, direction: 'up' | 'down') => {
+    if (direction === 'up' && index === 0) return;
+    if (direction === 'down' && index === uploadedFiles.length - 1) return;
+
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    const nextFiles = [...uploadedFiles];
+    
+    // Swap
+    const temp = nextFiles[index];
+    nextFiles[index] = nextFiles[targetIndex];
+    nextFiles[targetIndex] = temp;
+    
+    setUploadedFiles(nextFiles);
+    
+    // Reset fileBase64 and form url to first element
+    if (nextFiles.length > 0) {
+      setFileBase64(nextFiles[0].url);
+      setFormData(prev => ({
+        ...prev,
+        url: nextFiles[0].url,
+        title: prev.title === (uploadedFiles[0]?.title || '') ? nextFiles[0].title : prev.title
+      }));
+    }
+  };
+
+  const handleMakePrimary = (index: number) => {
+    if (index === 0) return;
+    const nextFiles = [...uploadedFiles];
+    
+    // Move to first
+    const [item] = nextFiles.splice(index, 1);
+    nextFiles.unshift(item);
+    
+    setUploadedFiles(nextFiles);
+    
+    setFileBase64(nextFiles[0].url);
+    setFormData(prev => ({
+      ...prev,
+      url: nextFiles[0].url,
+      title: prev.title === (uploadedFiles[0]?.title || '') ? nextFiles[0].title : prev.title
+    }));
+  };
 
   // New photo form state
   const [formData, setFormData] = useState({
@@ -208,66 +288,88 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
 
     if (validFiles.length === 0) return;
 
-    // Convert each to base64, resizing to max 1024px to save bandwidth
+    // Convert each to base64, resizing to max 1200px for spectacular quality while remaining compliant with Firestore constraints
     const promises = validFiles.map(file => {
-      return new Promise<{ url: string; title: string; filename: string }>((resolve, reject) => {
+      return new Promise<{ success: true; url: string; title: string; filename: string } | { success: false; error: string; filename: string }>((resolve) => {
         const reader = new FileReader();
         reader.onloadend = () => {
           const img = new Image();
           img.onload = () => {
-            const canvas = document.createElement('canvas');
-            const MAX_SIZE = 600;
-            let width = img.width;
-            let height = img.height;
+            try {
+              const canvas = document.createElement('canvas');
+              const MAX_SIZE = 1200;
+              let width = img.width;
+              let height = img.height;
 
-            if (width > height) {
-              if (width > MAX_SIZE) {
-                height *= MAX_SIZE / width;
-                width = MAX_SIZE;
+              if (width > height) {
+                if (width > MAX_SIZE) {
+                  height *= MAX_SIZE / width;
+                  width = MAX_SIZE;
+                }
+              } else {
+                if (height > MAX_SIZE) {
+                  width *= MAX_SIZE / height;
+                  height = MAX_SIZE;
+                }
               }
-            } else {
-              if (height > MAX_SIZE) {
-                width *= MAX_SIZE / height;
-                height = MAX_SIZE;
-              }
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx?.drawImage(img, 0, 0, width, height);
+              
+              // Clean/beautify the filename for default title
+              const label = file.name.split('.').slice(0, -1).join('.').replace(/[-_]/g, ' ');
+              resolve({
+                success: true,
+                url: canvas.toDataURL('image/jpeg', 0.7), // high details, compressed enough to save under 1MB easily
+                title: label.charAt(0).toUpperCase() + label.slice(1),
+                filename: file.name
+              });
+            } catch (e: any) {
+              resolve({ success: false, error: e.message || 'Erreur de configuration', filename: file.name });
             }
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx?.drawImage(img, 0, 0, width, height);
-            
-            // Clean/beautify the filename for default title
-            const label = file.name.split('.').slice(0, -1).join('.').replace(/[-_]/g, ' ');
-            resolve({
-              url: canvas.toDataURL('image/jpeg', 0.5),
-              title: label.charAt(0).toUpperCase() + label.slice(1),
-              filename: file.name
-            });
           };
-          img.onerror = () => reject();
+          img.onerror = () => resolve({ success: false, error: 'Chargement ou format corrompu', filename: file.name });
           img.src = reader.result as string;
         };
-        reader.onerror = () => reject();
+        reader.onerror = () => resolve({ success: false, error: 'Impossible de lire le fichier', filename: file.name });
         reader.readAsDataURL(file);
       });
     });
 
     Promise.all(promises).then(results => {
-      // In both editing mode and add mode, append files so existing photos are kept
+      const successful = results.filter((r): r is { success: true; url: string; title: string; filename: string } => r.success);
+      const failed = results.filter((r): r is { success: false; error: string; filename: string } => !r.success);
+
+      if (failed.length > 0) {
+        setDragError(`Erreur sur ${failed.length} photo(s) : ${failed.map(f => `"${f.filename}" (${f.error})`).join(', ')}`);
+      }
+
+      if (successful.length === 0) return;
+
       setUploadedFiles(prev => {
-        const next = [...prev, ...results];
+        const next = [...prev, ...successful.map(s => ({ url: s.url, title: s.title, filename: s.filename }))];
+        const primaryImage = next[0]?.url || '';
+
+        // If not editing, the first newly uploaded image is initialized as main preview & sync default text if title is blank
+        if (!isEditing) {
+          setFileBase64(primaryImage);
+          setFormData(f => ({
+            ...f,
+            url: primaryImage,
+            title: f.title || successful[0].title
+          }));
+        } else {
+          // If editing an existing project, keep the existing primary (index 0) as main cover preview and form url
+          setFileBase64(primaryImage);
+          setFormData(f => ({
+            ...f,
+            url: primaryImage
+          }));
+        }
+
         return next;
       });
-      if (results.length > 0) {
-        setFormData(prev => ({ 
-          ...prev, 
-          url: prev.url || results[0].url,
-          title: prev.title || results[0].title
-        }));
-        setFileBase64(results[0].url);
-      }
-    }).catch(err => {
-      console.error('Failure reading files:', err);
     });
   };
 
@@ -292,6 +394,7 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       processFiles(e.target.files);
+      e.target.value = ''; // Reset input to allow submitting the same file again
     }
   };
 
@@ -434,16 +537,20 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
   };
 
   // Delete all photos to start from scratch
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
     const confirmClear = window.confirm(
       "Êtes-vous sûr de vouloir SUPPRIMER TOUTES les photos de la galerie ? Cette action est irréversible et vous repartirez totalement à zéro !"
     );
     if (confirmClear) {
-      saveStoredPhotos([]);
-      setPhotos([]);
-      setSuccessMessage('✨ La galerie a été entièrement vidée. Vous pouvez maintenant repartir à zéro !');
-      setTimeout(() => setSuccessMessage(''), 5000);
-      resetForm();
+      try {
+        await clearAllPhotosFromStorage();
+        setPhotos([]);
+        setSuccessMessage('✨ La galerie a été entièrement vidée. Vous pouvez maintenant repartir à zéro !');
+        setTimeout(() => setSuccessMessage(''), 5000);
+        resetForm();
+      } catch (err: any) {
+        alert("Erreur lors de la suppression complète : " + err.message);
+      }
     }
   };
 
@@ -762,10 +869,15 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
                   {/* List of uploaded files to import */}
                   {uploadedFiles.length > 0 && (
                     <div className="space-y-3 pt-2 bg-stone-50/50 border border-stone-200 p-4">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-2">
-                        <span className="block text-[10.5px] font-sans font-bold uppercase tracking-wider text-[#051a0f]">
-                          Photos sélectionnées ({uploadedFiles.length})
-                        </span>
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-2 border-b border-stone-200/55 pb-2">
+                        <div className="text-left">
+                          <span className="block text-[10.5px] font-sans font-bold uppercase tracking-wider text-[#051a0f]">
+                            Photos sélectionnées ({uploadedFiles.length})
+                          </span>
+                          <span className="block text-[10px] text-stone-500 font-sans font-light mt-0.5">
+                            ↕️ Cliquez-glissez les photos pour les réorganiser. La 1ère sera l'image principale.
+                          </span>
+                        </div>
                         
                         <div className="flex items-center gap-2">
                           <button
@@ -776,21 +888,33 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
                               setFormData(prev => ({ ...prev, url: '' }));
                               if (fileInputRef.current) fileInputRef.current.value = '';
                             }}
-                            className="text-[10px] uppercase font-bold tracking-wider text-red-600 hover:text-red-800 font-sans cursor-pointer ml-2"
+                            className="text-[10px] uppercase font-bold tracking-wider text-red-650 hover:text-red-800 font-sans cursor-pointer ml-2"
                           >
                             Tout effacer
                           </button>
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-3 max-h-[220px] overflow-y-auto pr-1">
+                      <div className="grid grid-cols-2 gap-3 max-h-[260px] overflow-y-auto pr-1">
                         {uploadedFiles.map((file, index) => (
-                          <div key={index} className="relative group/thumb border border-stone-250 bg-white p-2 space-y-1.5 flex flex-col justify-between shadow-xs">
-                            <div className="relative aspect-video w-full overflow-hidden bg-stone-900 border border-stone-100">
+                          <div 
+                            key={index} 
+                            draggable
+                            onDragStart={(e) => handleFileDragStart(e, index)}
+                            onDragOver={(e) => handleFileDragOver(e, index)}
+                            onDrop={(e) => handleFileDrop(e, index)}
+                            onDragEnd={handleFileDragEnd}
+                            className={`relative group/thumb border bg-white p-2 space-y-1.5 flex flex-col justify-between shadow-xs transition-all duration-200 cursor-move ${
+                              draggedIndex === index 
+                                ? 'opacity-30 border-dashed border-[#C5A059] scale-95 bg-[#C5A059]/5' 
+                                : 'border-stone-200 hover:border-[#C5A059] hover:shadow-md'
+                            }`}
+                          >
+                            <div className="relative aspect-video w-full overflow-hidden bg-stone-900 border border-stone-100 select-none">
                               <img 
                                 src={file.url} 
                                 alt={file.title} 
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover pointer-events-none"
                                 referrerPolicy="no-referrer"
                               />
                               {/* Delete individual photo button */}
@@ -809,16 +933,27 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
                                     if (fileInputRef.current) fileInputRef.current.value = '';
                                   }
                                 }}
-                                className="absolute top-1 right-1 bg-rose-600 hover:bg-rose-700 text-white p-1 shadow transition-colors cursor-pointer"
+                                className="absolute top-1 right-1 bg-rose-600 hover:bg-rose-700 text-white p-1 shadow transition-colors cursor-pointer z-10"
                                 title="Retirer cette photo"
                               >
-                                <Trash2 className="w-3 h-3" />
+                                <Trash2 className="w-3 h-3 pointer-events-none" />
                               </button>
 
-                              {/* Index badge */}
-                              <span className="absolute bottom-1 left-1 bg-[#051a0f] text-white font-sans text-[8.5px] font-bold px-1.5 py-0.5 pointer-events-none">
-                                Photo {index + 1}
-                              </span>
+                              {/* Index / Primary badge */}
+                              {index === 0 ? (
+                                <span className="absolute top-1 left-1 bg-[#C5A059] text-[#051a0f] font-sans text-[8.5px] font-extrabold px-1.5 py-0.5 pointer-events-none shadow-sm uppercase tracking-wide">
+                                  ★ Principale
+                                </span>
+                              ) : (
+                                <span className="absolute top-1 left-1 bg-[#051a0f]/80 text-stone-200 font-sans text-[8.5px] font-medium px-1.5 py-0.5 pointer-events-none shadow-sm opacity-0 group-hover/thumb:opacity-100 transition-opacity">
+                                  Photo {index + 1}
+                                </span>
+                              )}
+
+                              {/* Drag tooltip on hover */}
+                              <div className="absolute inset-x-0 bottom-0 bg-[#051a0f]/60 text-white text-[7.5px] text-center font-sans py-0.5 pointer-events-none opacity-0 group-hover/thumb:opacity-100 transition-opacity">
+                                ↕️ Glisser pour réorganiser
+                              </div>
                             </div>
 
                             {/* Subtitle/Title input per specific image */}
@@ -840,8 +975,56 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
                                     setFormData(prev => ({ ...prev, title: e.target.value }));
                                   }
                                 }}
-                                className="w-full px-2 py-1 bg-stone-50 border border-stone-200 font-sans text-[10px] focus:outline-none focus:ring-1 focus:ring-[#C5A059] focus:border-[#C5A059] transition-all text-stone-700"
+                                className="w-full px-2 py-1 bg-stone-50 border border-stone-200 font-sans text-[10px] focus:outline-none focus:ring-1 focus:ring-[#C5A059] focus:border-[#C5A059] transition-all text-stone-700 font-medium"
                               />
+                            </div>
+
+                            {/* Reordering Toolbar */}
+                            <div className="flex items-center justify-between gap-1 mt-1 border-t border-stone-100 pt-1.5">
+                              {index > 0 ? (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleMakePrimary(index);
+                                  }}
+                                  className="text-[8px] uppercase font-bold tracking-wider text-amber-600 hover:text-[#051a0f] font-sans flex items-center gap-0.5 cursor-pointer"
+                                  title="Définir comme photo principale"
+                                >
+                                  ★ Mettre en principale
+                                </button>
+                              ) : (
+                                <span className="text-[8px] uppercase tracking-wider text-[#C5A059] font-extrabold font-sans">
+                                  ★ Photo principale
+                                </span>
+                              )}
+                              
+                              <div className="flex items-center gap-1 select-none">
+                                <button
+                                  type="button"
+                                  disabled={index === 0}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleMoveFile(index, 'up');
+                                  }}
+                                  className={`p-0.5 hover:bg-stone-100 border border-stone-200 ${index === 0 ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
+                                  title="Déplacer à gauche (Monter en priorité)"
+                                >
+                                  <ChevronUp className="w-3 h-3 text-stone-600" />
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={index === uploadedFiles.length - 1}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleMoveFile(index, 'down');
+                                  }}
+                                  className={`p-0.5 hover:bg-stone-105 border border-stone-200 ${index === uploadedFiles.length - 1 ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
+                                  title="Déplacer à droite (Descendre en priorité)"
+                                >
+                                  <ChevronDown className="w-3 h-3 text-stone-600" />
+                                </button>
+                              </div>
                             </div>
                           </div>
                         ))}

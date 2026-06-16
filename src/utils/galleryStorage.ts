@@ -54,3 +54,14 @@ export async function deletePhotoFromStorage(id: string): Promise<void> {
   }
 }
 
+export async function clearAllPhotosFromStorage(): Promise<void> {
+  try {
+    const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
+    const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
+    await Promise.all(deletePromises);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, COLLECTION_NAME);
+    throw error;
+  }
+}
+

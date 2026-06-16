@@ -4,7 +4,12 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
-class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null; errorInfo: ErrorInfo | null }> {
+class ErrorBoundary extends React.Component<{ children: ReactNode }, { hasError: boolean; error: Error | null; errorInfo: ErrorInfo | null }> {
+  // @ts-ignore
+  state: { hasError: boolean; error: Error | null; errorInfo: ErrorInfo | null };
+  // @ts-ignore
+  props: { children: ReactNode };
+
   constructor(props: { children: ReactNode }) {
     super(props);
     this.state = { hasError: false, error: null, errorInfo: null };
@@ -15,7 +20,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    this.setState({ errorInfo });
+    (this as any).setState({ errorInfo });
     console.error("App Error:", error, errorInfo);
   }
 

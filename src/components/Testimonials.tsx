@@ -4,7 +4,7 @@ import { testimonials } from '../data';
 import { Testimonial } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { Quote, ChevronLeft, ChevronRight, Star, Plus, X, UploadCloud, Trash2, CheckCircle2, MessageSquare } from 'lucide-react';
-import { getStoredTestimonials, subscribeToPublicTestimonials, addTestimonialToStorage } from '../utils/testimonialStorage';
+import { subscribeToPublicTestimonials, addTestimonialToStorage } from '../utils/testimonialStorage';
 
 export default function Testimonials() {
   const [list, setList] = useState<Testimonial[]>([]);

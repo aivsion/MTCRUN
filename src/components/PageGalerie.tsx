@@ -3,8 +3,23 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Eye, MapPin, Grid, Layers, Compass } from 'lucide-react';
 import { GalleryPhoto } from '../types';
 
+interface NavigationOptions {
+  index: number;
+  total: number;
+  onNext: () => void;
+  onPrev: () => void;
+}
+
 interface PageGalerieProps {
-  openModal: (title: string, content: string, imageUrl?: string, category?: string, chantierId?: string, imageUrls?: string[]) => void;
+  openModal: (
+    title: string, 
+    content: string, 
+    imageUrl?: string, 
+    category?: string, 
+    chantierId?: string, 
+    imageUrls?: string[],
+    navigation?: NavigationOptions
+  ) => void;
   photos: GalleryPhoto[];
   activeFilter?: 'TOUTES' | 'CHARPENTE BOIS' | 'AMÉNAGEMENTS BOIS' | 'MENUISERIE BOIS';
   setActiveFilter?: (filter: 'TOUTES' | 'CHARPENTE BOIS' | 'AMÉNAGEMENTS BOIS' | 'MENUISERIE BOIS') => void;
