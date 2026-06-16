@@ -79,11 +79,36 @@ export default function Testimonials() {
         const reader = new FileReader();
         reader.onloadend = () => {
           if (typeof reader.result === 'string') {
-            const base64Data = reader.result;
-            setFormData(prev => ({
-              ...prev,
-              projectPhotos: [...prev.projectPhotos, base64Data].slice(0, 10)
-            }));
+            const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              const MAX_SIZE = 1024;
+              let width = img.width;
+              let height = img.height;
+
+              if (width > height) {
+                if (width > MAX_SIZE) {
+                  height *= MAX_SIZE / width;
+                  width = MAX_SIZE;
+                }
+              } else {
+                if (height > MAX_SIZE) {
+                  width *= MAX_SIZE / height;
+                  height = MAX_SIZE;
+                }
+              }
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx?.drawImage(img, 0, 0, width, height);
+              
+              const base64Data = canvas.toDataURL('image/jpeg', 0.8);
+              setFormData(prev => ({
+                ...prev,
+                projectPhotos: [...prev.projectPhotos, base64Data].slice(0, 10)
+              }));
+            };
+            img.src = reader.result;
           }
         };
         reader.readAsDataURL(file);

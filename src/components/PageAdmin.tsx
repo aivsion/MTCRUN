@@ -104,7 +104,6 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
 
 // Success notifications
   const [successMessage, setSuccessMessage] = useState('');
-  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
   // Active Tab state
   const [activeTab, setActiveTab] = useState<'photos' | 'testimonials'>('photos');
@@ -170,7 +169,7 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
     }
   };
 
-  // Convert Files to Base64
+  // Convert Files to Base64 with resizing
   const processFiles = (files: FileList) => {
     const validFiles: File[] = [];
     let errorMsg = '';
@@ -179,11 +178,6 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
       const file = files[i];
       if (!file.type.startsWith('image/')) {
         errorMsg = 'Seuls les fichiers d’image sont autorisés.';
-        continue;
-      }
-      // Limit to 5MB for localStorage friendliness
-      if (file.size > 5 * 1024 * 1024) {
-        errorMsg = 'L’une des images dépasse 5Mo. Les images de plus de 5Mo ont été ignorées.';
         continue;
       }
       validFiles.push(file);
@@ -197,18 +191,44 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
 
     if (validFiles.length === 0) return;
 
-    // Convert each to base64
+    // Convert each to base64, resizing to max 1024px to save bandwidth
     const promises = validFiles.map(file => {
       return new Promise<{ url: string; title: string; filename: string }>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => {
-          // Clean/beautify the filename for default title
-          const label = file.name.split('.').slice(0, -1).join('.').replace(/[-_]/g, ' ');
-          resolve({
-            url: reader.result as string,
-            title: label.charAt(0).toUpperCase() + label.slice(1),
-            filename: file.name
-          });
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const MAX_SIZE = 1024;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+              if (width > MAX_SIZE) {
+                height *= MAX_SIZE / width;
+                width = MAX_SIZE;
+              }
+            } else {
+              if (height > MAX_SIZE) {
+                width *= MAX_SIZE / height;
+                height = MAX_SIZE;
+              }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0, width, height);
+            
+            // Clean/beautify the filename for default title
+            const label = file.name.split('.').slice(0, -1).join('.').replace(/[-_]/g, ' ');
+            resolve({
+              url: canvas.toDataURL('image/jpeg', 0.8),
+              title: label.charAt(0).toUpperCase() + label.slice(1),
+              filename: file.name
+            });
+          };
+          img.onerror = () => reject();
+          img.src = reader.result as string;
         };
         reader.onerror = () => reject();
         reader.readAsDataURL(file);
@@ -276,43 +296,6 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
     }));
   };
 
-  // Handle AI generation form fill
-  const handleAIGenerate = async () => {
-    if (uploadedFiles.length === 0) {
-      alert("Veuillez d'abord ajouter au moins une photo pour l'analyse.");
-      return;
-    }
-    setIsGeneratingAI(true);
-    try {
-      const response = await fetch('/api/analyze-photos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ images: uploadedFiles.map(f => f.url) })
-      });
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || "Erreur lors de l'analyse IA");
-      }
-      
-      const data = await response.json();
-      setFormData(prev => ({
-        ...prev,
-        title: data.title || prev.title,
-        category: data.category || prev.category,
-        chantierName: data.chantierName || prev.chantierName,
-        location: data.location || prev.location,
-        description: data.description || prev.description,
-      }));
-      setSuccessMessage('✨ Formulaire auto-rempli par l\'IA avec succès !');
-      setTimeout(() => setSuccessMessage(''), 4000);
-    } catch (e: any) {
-      console.error("AI Generate Error:", e);
-      alert(`Erreur lors de la génération IA: ${e.message}\nVeuillez réessayer.`);
-    } finally {
-      setIsGeneratingAI(false);
-    }
-  };
-
   // Handle form submission (Add or Edit)
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -331,7 +314,7 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
         chantierName: formData.chantierName || 'Nouveau Chantier',
         location: formData.location || 'La Réunion',
         description: formData.description || '',
-        url: formData.url || editingPhoto.url
+        urls: uploadedFiles.length > 0 ? uploadedFiles.map(f => f.url) : editingPhoto.urls
       };
       updatePhotoInStorage(updated);
       setSuccessMessage('Photo de chantier modifiée avec succès.');
@@ -341,28 +324,27 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
         // Uploaded files mode
         const chantierId = `chantier-${Date.now()}`;
         const finalChantierName = formData.chantierName || 'Nouveau Chantier';
-        uploadedFiles.forEach((file, index) => {
-          const photoTitle = file.title.trim() || formData.title || `Photo ${index + 1}`;
-          addPhotoToStorage({
-            title: photoTitle,
-            category: formData.category || 'CHARPENTE BOIS',
-            chantierName: finalChantierName,
-            location: formData.location || 'La Réunion',
-            description: formData.description || '',
-            url: file.url,
-            chantierId: chantierId
-          });
+        
+        addPhotoToStorage({
+          title: formData.title || 'Nouvelle réalisation',
+          category: formData.category || 'CHARPENTE BOIS',
+          chantierName: finalChantierName,
+          location: formData.location || 'La Réunion',
+          description: formData.description || '',
+          urls: uploadedFiles.map(f => f.url),
+          chantierId: chantierId
         });
-        setSuccessMessage(`✨ ${uploadedFiles.length} photo(s) ajoutée(s) avec succès pour le chantier "${finalChantierName}".`);
+        
+        setSuccessMessage(`✨ Chantier "${finalChantierName}" avec ${uploadedFiles.length} photo(s) ajouté avec succès.`);
       } else {
-        // Direct URL mode
+        // Direct URL mode (fallback if URL was manual - but wait, we only support urls array now)
         addPhotoToStorage({
           title: formData.title || 'Nouvelle réalisation',
           category: formData.category || 'CHARPENTE BOIS',
           chantierName: formData.chantierName || 'Nouveau Chantier',
           location: formData.location || 'La Réunion',
           description: formData.description || '',
-          url: formData.url,
+          urls: formData.url ? [formData.url] : [],
           chantierId: `chantier-${Date.now()}`
         });
         setSuccessMessage('Nouvelle photo de chantier ajoutée avec succès.');
@@ -403,14 +385,14 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
       chantierName: photo.chantierName,
       location: photo.location,
       description: photo.description,
-      url: photo.url
+      url: photo.urls && photo.urls.length > 0 ? photo.urls[0] : ''
     });
-    setFileBase64(photo.url.startsWith('data:') ? photo.url : '');
-    setUploadedFiles([{
-      url: photo.url,
-      title: photo.title,
-      filename: 'image-existante'
-    }]);
+    setFileBase64('');
+    setUploadedFiles(photo.urls ? photo.urls.map((u, i) => ({
+      url: u,
+      title: `${photo.title} ${i + 1}`,
+      filename: `image-${i}`
+    })) : []);
     
     // Scroll smoothly to edit form
     window.scrollTo({ top: 300, behavior: 'smooth' });
@@ -747,24 +729,6 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
                         </span>
                         
                         <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={handleAIGenerate}
-                            disabled={isGeneratingAI}
-                            className={`inline-flex items-center gap-1.5 px-3 py-1 text-[10px] uppercase font-bold tracking-wider font-sans border transition-all cursor-pointer ${
-                              isGeneratingAI 
-                                ? 'bg-indigo-50 border-indigo-200 text-indigo-400 cursor-not-allowed'
-                                : 'bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300'
-                            }`}
-                          >
-                            {isGeneratingAI ? (
-                              <RefreshCw className="w-3 h-3 animate-spin" />
-                            ) : (
-                              <Wand2 className="w-3 h-3" />
-                            )}
-                            {isGeneratingAI ? 'Analyse IA...' : 'Analyse IA des photos'}
-                          </button>
-                          
                           {!isEditing && (
                             <button
                               type="button"
@@ -982,7 +946,7 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
                       {/* Image Preview Thumbnail */}
                       <div className="w-20 sm:w-24 aspect-[4/3] relative flex-shrink-0 bg-stone-100 overflow-hidden border border-stone-100">
                         <img 
-                          src={photo.url} 
+                          src={photo.urls && photo.urls.length > 0 ? photo.urls[0] : ''} 
                           alt={photo.title} 
                           className="w-full h-full object-cover"
                           referrerPolicy="no-referrer"

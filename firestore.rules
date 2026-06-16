@@ -16,7 +16,7 @@ service cloud.firestore {
     match /gallery_photos/{photoId} {
       function isValidGalleryPhoto(data) {
         // Enforce required keys
-        return data.url is string && data.url.size() <= 2048
+        return data.urls is list && data.urls.size() <= 20
           && data.category is string && data.category.size() <= 100
           && data.title is string && data.title.size() <= 200
           && (data.get('chantierName', '') is string && data.get('chantierName', '').size() <= 200)

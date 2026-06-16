@@ -4,7 +4,7 @@ import { Eye, MapPin, Grid, Layers, Compass } from 'lucide-react';
 import { GalleryPhoto } from '../types';
 
 interface PageGalerieProps {
-  openModal: (title: string, content: string, imageUrl?: string, category?: string, chantierId?: string) => void;
+  openModal: (title: string, content: string, imageUrl?: string, category?: string, chantierId?: string, imageUrls?: string[]) => void;
   photos: GalleryPhoto[];
 }
 
@@ -33,7 +33,8 @@ ${photo.description}
 
 Chez MTC RUN CONSTRUCTION, nos charpentes fines, menuiseries d'exception et decks de varangues font l'objet d'un processus rigoureux : sélection méticuleuse d'essences d'arbres locales et d'importations durables (FSC), contrôle hygrométrique à 12%, taille d'une précision millimétrique par commande numérique (CNC), et finition de haute durabilité préservant le veinage et résistant aux dures atmosphères marines de La Réunion.`;
 
-    openModal(photo.title, details, photo.url, photo.category, photo.chantierId);
+    const firstImage = photo.urls && photo.urls.length > 0 ? photo.urls[0] : undefined;
+    openModal(photo.title, details, firstImage, photo.category, photo.chantierId, photo.urls);
   };
 
   return (
@@ -99,7 +100,7 @@ Chez MTC RUN CONSTRUCTION, nos charpentes fines, menuiseries d'exception et deck
                   className="group relative aspect-[4/3] bg-stone-150 overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 border border-stone-200/40 hover:border-[#C5A059]/30 flex flex-col justify-end"
                 >
                   <img
-                    src={photo.url}
+                    src={photo.urls && photo.urls.length > 0 ? photo.urls[0] : ''}
                     alt={photo.title}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     referrerPolicy="no-referrer"

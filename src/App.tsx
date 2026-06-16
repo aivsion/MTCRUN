@@ -69,6 +69,7 @@ export default function App() {
     imageUrl?: string;
     category?: string;
     chantierId?: string;
+    imageUrls?: string[];
   }>({
     isOpen: false,
     title: '',
@@ -85,38 +86,24 @@ export default function App() {
     currentIndex: 0,
   });
 
-  const openFullscreen = (chantierId?: string, currentImageUrl?: string) => {
-    if (!currentImageUrl) return;
-
-    let relatedPhotos: GalleryPhoto[] = [];
+  const openFullscreen = (imageUrls?: string[], currentImageUrl?: string) => {
+    if (!currentImageUrl && (!imageUrls || imageUrls.length === 0)) return;
     
-    if (chantierId) {
-      relatedPhotos = photos.filter(p => p.chantierId === chantierId);
-    } 
-    
-    if (relatedPhotos.length === 0) {
-      const match = photos.find(p => p.url === currentImageUrl);
-      if (match) {
-        relatedPhotos = [match];
-      } else {
-        relatedPhotos = [{
-          id: 'temp',
-          url: currentImageUrl,
-          title: modalData.title,
-          description: modalData.content,
-          category: (modalData.category as any) || 'CHARPENTE BOIS',
-          chantierId: chantierId || 'temp',
-          chantierName: '',
-          location: ''
-        }];
-      }
-    }
-
-    const index = relatedPhotos.findIndex(p => p.url === currentImageUrl);
+    const urlsToUse = (imageUrls && imageUrls.length > 0) ? imageUrls : (currentImageUrl ? [currentImageUrl] : []);
+    const index = currentImageUrl ? urlsToUse.findIndex(url => url === currentImageUrl) : 0;
     
     setFullscreenData({
       isOpen: true,
-      photos: relatedPhotos,
+      photos: urlsToUse.map(url => ({
+        id: 'temp',
+        urls: [url],
+        title: modalData.title,
+        description: modalData.content,
+        category: (modalData.category as any) || 'CHARPENTE BOIS',
+        chantierId: modalData.chantierId || 'temp',
+        chantierName: '',
+        location: ''
+      })),
       currentIndex: index >= 0 ? index : 0,
     });
   };
@@ -141,14 +128,15 @@ export default function App() {
     }));
   };
 
-  const openModal = (title: string, content: string, imageUrl?: string, category?: string, chantierId?: string) => {
+  const openModal = (title: string, content: string, imageUrl?: string, category?: string, chantierId?: string, imageUrls?: string[]) => {
     setModalData({
       isOpen: true,
       title,
       content,
       imageUrl,
       category,
-      chantierId
+      chantierId,
+      imageUrls
     });
   };
 
@@ -241,7 +229,7 @@ export default function App() {
               {modalData.imageUrl && (
                 <div 
                   className="relative w-full aspect-video bg-stone-100 overflow-hidden border-b border-gray-100 group cursor-pointer"
-                  onClick={() => openFullscreen(modalData.chantierId, modalData.imageUrl)}
+                  onClick={() => openFullscreen(modalData.imageUrls, modalData.imageUrl)}
                 >
                   <img
                     src={modalData.imageUrl}
@@ -307,7 +295,7 @@ export default function App() {
           {/* Current Image */}
           <div className="relative z-10 max-w-7xl max-h-[90vh] w-full px-4 md:px-12 flex flex-col items-center justify-center pointer-events-none">
             <img 
-              src={fullscreenData.photos[fullscreenData.currentIndex].url} 
+              src={fullscreenData.photos[fullscreenData.currentIndex].urls[0]} 
               alt={fullscreenData.photos[fullscreenData.currentIndex].title}
               className="max-h-[85vh] max-w-full object-contain pointer-events-auto shadow-2xl"
               referrerPolicy="no-referrer"

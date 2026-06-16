@@ -29,7 +29,7 @@ export interface Project {
 
 export interface GalleryPhoto {
   id: string;
-  url: string;
+  urls: string[];
   category: 'CHARPENTE BOIS' | 'AMÉNAGEMENTS BOIS' | 'MENUISERIE BOIS';
   chantierId: string;
   chantierName: string;
