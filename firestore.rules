@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} { 
+      allow read, write: if false; 
+    }
+
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() { 
+      return isSignedIn() && 
+      (request.auth.token.email == 'sainghil.lesav@gmail.com' || request.auth.token.email == 'mtcrunconstruction@gmail.com');
+    }
+
+    match /gallery_photos/{photoId} {
+      function isValidGalleryPhoto(data) {
+        // Enforce required keys
+        return data.url is string && data.url.size() <= 2048
+          && data.category is string && data.category.size() <= 100
+          && data.title is string && data.title.size() <= 200
+          && (data.get('chantierName', '') is string && data.get('chantierName', '').size() <= 200)
+          && (data.get('location', '') is string && data.get('location', '').size() <= 200)
+          && (data.get('description', '') is string && data.get('description', '').size() <= 5000)
+          && (data.get('createdAt', 0) is number);
+      }
+
+      allow read: if true;
+      allow create: if isAdmin() && isValidGalleryPhoto(incoming());
+      allow update: if isAdmin() && isValidGalleryPhoto(incoming());
+      allow delete: if isAdmin();
+    }
+
+    match /testimonials/{testimonialId} {
+      function isValidTestimonial(data) {
+        return data.clientName is string && data.clientName.size() <= 200
+          && data.projectType is string && data.projectType.size() <= 200
+          && data.city is string && data.city.size() <= 200
+          && data.comment is string && data.comment.size() <= 5000
+          && data.rating is number && data.rating >= 1 && data.rating <= 5
+          && (data.get('region', '') is string && data.get('region', '').size() <= 200)
+          && (data.get('country', '') is string && data.get('country', '').size() <= 200)
+          && (data.get('period', '') is string && data.get('period', '').size() <= 200)
+          && (data.get('projectPhotos', []) is list && data.get('projectPhotos', []).size() <= 10)
+          && (data.get('approved', false) is bool)
+          && (data.get('createdAt', 0) is number);
+      }
+
+      allow read: if isAdmin() || (resource.data.approved == true || resource.data.get('approved', false) == true);
+      
+      allow create: if isValidTestimonial(incoming()) && incoming().get('approved', false) == false;
+      
+      allow update: if isAdmin() && isValidTestimonial(incoming());
+      allow delete: if isAdmin();
+    }
+  }
+}

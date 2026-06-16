@@ -1,0 +1,49 @@
+{
+  "entities": {
+    "Testimonial": {
+      "title": "Testimonial",
+      "description": "A client testimonial for the site",
+      "type": "object",
+      "properties": {
+        "clientName": { "type": "string" },
+        "projectType": { "type": "string" },
+        "city": { "type": "string" },
+        "region": { "type": "string" },
+        "country": { "type": "string" },
+        "comment": { "type": "string" },
+        "rating": { "type": "number" },
+        "period": { "type": "string" },
+        "projectPhotos": { "type": "array", "items": { "type": "string" } },
+        "approved": { "type": "boolean" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["clientName", "projectType", "city", "comment", "rating"]
+    },
+    "GalleryPhoto": {
+      "title": "GalleryPhoto",
+      "description": "A photo for the gallery",
+      "type": "object",
+      "properties": {
+        "url": { "type": "string" },
+        "category": { "type": "string" },
+        "chantierId": { "type": "string" },
+        "chantierName": { "type": "string" },
+        "location": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["url", "category", "title"]
+    }
+  },
+  "firestore": {
+    "testimonials": {
+      "schema": { "$ref": "#/entities/Testimonial" },
+      "description": "All client testimonials"
+    },
+    "gallery_photos": {
+      "schema": { "$ref": "#/entities/GalleryPhoto" },
+      "description": "All gallery photos"
+    }
+  }
+}

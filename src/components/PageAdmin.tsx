@@ -1,17 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { GalleryPhoto, Testimonial } from '../types';
 import { 
-  getStoredPhotos, 
-  saveStoredPhotos, 
   addPhotoToStorage, 
   updatePhotoInStorage, 
-  deletePhotoFromStorage 
+  deletePhotoFromStorage,
+  subscribeToGalleryPhotos
 } from '../utils/galleryStorage';
 import {
-  getStoredTestimonials,
   toggleTestimonialApproval,
-  deleteTestimonialFromStorage
+  deleteTestimonialFromStorage,
+  subscribeToAdminTestimonials
 } from '../utils/testimonialStorage';
+import { auth } from '../firebaseSetup';
+import { signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'firebase/auth';
 import { 
   Plus, 
   Edit, 
@@ -38,17 +39,41 @@ import {
 
 interface PageAdminProps {
   setCurrentPage: (page: string) => void;
-  onPhotosUpdated: () => void;
 }
 
-export default function PageAdmin({ setCurrentPage, onPhotosUpdated }: PageAdminProps) {
+export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
   // Authentication state
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem('mtc_admin_authenticated') === 'true';
-  });
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [loginError, setLoginError] = useState('');
+  const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      setIsAuthenticated(!!user);
+      setAuthLoading(false);
+    });
+    return () => unsub();
+  }, []);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError('');
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      setSuccessMessage('Connexion réussie.');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err: any) {
+      setLoginError('Échec de la connexion: ' + err.message);
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    setSuccessMessage('Déconnexion réussie.');
+    setTimeout(() => setSuccessMessage(''), 3000);
+  };
+
 
   // Photos management state
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
@@ -89,10 +114,25 @@ export default function PageAdmin({ setCurrentPage, onPhotosUpdated }: PageAdmin
 
   // Load photos and testimonials on mount / auth change
   useEffect(() => {
+    let unsubPhotos: any;
+    let unsubTestimonials: any;
+
     if (isAuthenticated) {
-      setPhotos(getStoredPhotos());
-      setTestimonialsList(getStoredTestimonials());
+      unsubPhotos = subscribeToGalleryPhotos((data) => {
+        setPhotos(data);
+      });
+      unsubTestimonials = subscribeToAdminTestimonials((data) => {
+        setTestimonialsList(data);
+      });
+    } else {
+      setPhotos([]);
+      setTestimonialsList([]);
     }
+
+    return () => {
+      if (unsubPhotos) unsubPhotos();
+      if (unsubTestimonials) unsubTestimonials();
+    };
   }, [isAuthenticated]);
 
   // Derived state: filter photos by category in real-time
@@ -101,49 +141,33 @@ export default function PageAdmin({ setCurrentPage, onPhotosUpdated }: PageAdmin
     : photos.filter(p => p.category === selectedCategory);
 
   // Handle testimonial approval toggle
-  const handleToggleApproval = (id: string, currentApproved: boolean) => {
+  const handleToggleApproval = async (id: string, currentApproved: boolean) => {
     const nextApprovedState = !currentApproved;
-    const updated = toggleTestimonialApproval(id, nextApprovedState);
-    setTestimonialsList(updated);
-    setSuccessMessage(
-      nextApprovedState 
-        ? "✨ Témoignage approuvé ! Il est maintenant visible sur le site public." 
-        : "👁️ Témoignage suspendu. Il a été masqué du site public."
-    );
-    setTimeout(() => setSuccessMessage(''), 4000);
+    try {
+      await toggleTestimonialApproval(id, nextApprovedState);
+      setSuccessMessage(
+        nextApprovedState 
+          ? "✨ Témoignage approuvé ! Il est maintenant visible sur le site public." 
+          : "👁️ Témoignage suspendu. Il a été masqué du site public."
+      );
+      setTimeout(() => setSuccessMessage(''), 4000);
+    } catch (e: any) {
+      alert("Erreur: " + e.message);
+    }
   };
 
   // Handle testimonial deletion
-  const handleDeleteTestimonial = (id: string, clientName: string) => {
+  const handleDeleteTestimonial = async (id: string, clientName: string) => {
     const confirmDelete = window.confirm(`Êtes-vous sûr de vouloir supprimer définitivement le témoignage de "${clientName}" ?`);
     if (confirmDelete) {
-      const updated = deleteTestimonialFromStorage(id);
-      setTestimonialsList(updated);
-      setSuccessMessage('🗑️ Témoignage supprimé du système.');
-      setTimeout(() => setSuccessMessage(''), 3000);
+      try {
+        await deleteTestimonialFromStorage(id);
+        setSuccessMessage('🗑️ Témoignage supprimé du système.');
+        setTimeout(() => setSuccessMessage(''), 3000);
+      } catch (e: any) {
+        alert("Erreur: " + e.message);
+      }
     }
-  };
-
-  // Handle Login
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (username.trim() === 'MTCRUN' && password === 'Mtcrun974@') {
-      setIsAuthenticated(true);
-      localStorage.setItem('mtc_admin_authenticated', 'true');
-      setLoginError('');
-      setSuccessMessage('Connexion réussie.');
-      setTimeout(() => setSuccessMessage(''), 3000);
-    } else {
-      setLoginError('Identifiant ou mot de passe incorrect.');
-    }
-  };
-
-  // Handle Logout
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem('mtc_admin_authenticated');
-    setUsername('');
-    setPassword('');
   };
 
   // Convert Files to Base64
@@ -489,45 +513,13 @@ export default function PageAdmin({ setCurrentPage, onPhotosUpdated }: PageAdmin
               </div>
             )}
 
-            <form onSubmit={handleLogin} className="space-y-4 text-left">
-              <div className="space-y-1.5">
-                <label className="block text-[10px] font-sans font-bold uppercase tracking-wider text-stone-500">
-                  Identifiant
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="MTCRUN"
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 font-sans text-sm focus:outline-none focus:ring-1 focus:ring-[#C5A059] focus:border-[#C5A059] rounded-none transition-all placeholder:text-stone-300"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="block text-[10px] font-sans font-bold uppercase tracking-wider text-stone-500">
-                  Mot de passe
-                </label>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 font-sans text-sm focus:outline-none focus:ring-1 focus:ring-[#C5A059] focus:border-[#C5A059] rounded-none transition-all placeholder:text-stone-300"
-                />
-              </div>
-
+            <div className="pt-4 space-y-4">
               <button
-                type="submit"
-                className="w-full bg-[#051a0f] hover:bg-[#C5A059] text-white hover:text-[#051a0f] font-sans text-xs tracking-widest uppercase font-bold py-4 transition-all duration-300 cursor-pointer text-center"
+                onClick={handleLogin}
+                className="w-full bg-[#051a0f] hover:bg-[#C5A059] text-white hover:text-[#051a0f] font-sans text-xs tracking-widest uppercase font-bold py-4 transition-all duration-300 cursor-pointer text-center flex justify-center items-center gap-2"
               >
-                Se connecter
+                Se connecter avec Google
               </button>
-            </form>
-
-            <div className="pt-4 border-t border-stone-100 text-[10px] font-mono text-stone-400">
-              * Identifiant : <span className="font-bold text-stone-600">MTCRUN</span> | Mot de passe : <span className="font-bold text-stone-600">Mtcrun974@</span>
             </div>
           </div>
         </div>

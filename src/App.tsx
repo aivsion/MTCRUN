@@ -8,17 +8,21 @@ import PageGalerie from './components/PageGalerie';
 import PageContact from './components/PageContact';
 import PageAdmin from './components/PageAdmin';
 import Page404 from './components/Page404';
-import { getStoredPhotos } from './utils/galleryStorage';
+import { subscribeToGalleryPhotos } from './utils/galleryStorage';
 import { X, Check, ChevronLeft, ChevronRight, Maximize } from 'lucide-react';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('accueil');
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
 
-  // Synchronize dynamic gallery photos from localStorage or defaults
+  // Synchronize dynamic gallery photos from Firebase
   useEffect(() => {
-    setPhotos(getStoredPhotos());
+    const unsubscribe = subscribeToGalleryPhotos((data) => {
+      setPhotos(data);
+    });
+    return () => unsubscribe();
   }, [currentPage]);
+
 
   // Route URL listener for /ADMIN or /admin
   useEffect(() => {
@@ -173,7 +177,6 @@ export default function App() {
         return (
           <PageAdmin 
             setCurrentPage={setCurrentPage} 
-            onPhotosUpdated={() => setPhotos(getStoredPhotos())} 
           />
         );
       case '404':

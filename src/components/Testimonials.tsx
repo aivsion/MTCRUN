@@ -3,18 +3,24 @@ import { testimonials } from '../data';
 import { Testimonial } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { Quote, ChevronLeft, ChevronRight, Star, Plus, X, UploadCloud, Trash2, CheckCircle2, MessageSquare } from 'lucide-react';
-import { getStoredTestimonials } from '../utils/testimonialStorage';
+import { getStoredTestimonials, subscribeToPublicTestimonials, addTestimonialToStorage } from '../utils/testimonialStorage';
 
 export default function Testimonials() {
-  // Load initial state from LocalStorage or default fallback data
-  const [list, setList] = useState<Testimonial[]>(() => {
-    return getStoredTestimonials();
-  });
-
+  const [list, setList] = useState<Testimonial[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState(false);
+
+  useEffect(() => {
+    const unsub = subscribeToPublicTestimonials((data) => {
+      setList(data);
+      if (data.length > 0 && activeIndex >= data.length) {
+        setActiveIndex(0);
+      }
+    });
+    return () => unsub();
+  }, [activeIndex]);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   // Form State
@@ -133,8 +139,7 @@ export default function Testimonials() {
       ? formData.projectPhotos
       : ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80"];
 
-    const newTestimonial: Testimonial = {
-      id: `custom-testimonial-${Date.now()}`,
+    const newTestimonial = {
       clientName: formData.clientName,
       projectType: formData.projectType,
       city: formData.city,
@@ -143,51 +148,49 @@ export default function Testimonials() {
       comment: formData.comment,
       rating: formData.rating,
       period: formData.period || 'Récent',
-      projectPhotos: finalPhotos,
-      approved: false
+      projectPhotos: finalPhotos
     };
 
-    const updatedList = [newTestimonial, ...list];
-    setList(updatedList);
-    localStorage.setItem('mtc_testimonials', JSON.stringify(updatedList));
-    
-    // Select the first testimonial
-    setActiveIndex(0);
-
-    // Reset form
-    setFormData({
-      clientName: '',
-      projectType: '',
-      city: '',
-      region: 'La Réunion',
-      country: 'France',
-      comment: '',
-      rating: 5,
-      period: '',
-      projectPhotos: []
-    });
-
-    // Show success message briefly
-    setSuccessMessage(true);
-    setTimeout(() => {
-      setSuccessMessage(false);
-      setIsFormOpen(false);
-    }, 4500);
-
-    // Send notification to admin
     try {
-      await fetch('/api/notify-testimonial', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newTestimonial)
+      await addTestimonialToStorage(newTestimonial);
+
+      // Reset form
+      setFormData({
+        clientName: '',
+        projectType: '',
+        city: '',
+        region: 'La Réunion',
+        country: 'France',
+        comment: '',
+        rating: 5,
+        period: '',
+        projectPhotos: []
       });
-    } catch (e) {
-      console.error("Failed to send notification email", e);
+
+      // Show success message briefly
+      setSuccessMessage(true);
+      setTimeout(() => {
+        setSuccessMessage(false);
+        setIsFormOpen(false);
+      }, 4500);
+
+      // Send notification to admin
+      try {
+        await fetch('/api/notify-testimonial', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newTestimonial)
+        });
+      } catch (e) {
+        console.error("Failed to send notification email", e);
+      }
+    } catch (err: any) {
+      alert("Erreur: " + err.message);
     }
   };
 
   return (
-    <section id="temoignages-section" className="py-24 md:py-32 bg-[#fdfdfc] text-[#1a1c1c] overflow-visible sm:overflow-x-hidden scroll-mt-24 border-t border-gray-100">
+    <section id="temoignages-section" className="py-24 md:py-32 bg-transparent text-[#1a1c1c] overflow-visible sm:overflow-x-hidden scroll-mt-24 border-t border-transparent">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         
         {/* Header Section */}
@@ -196,8 +199,8 @@ export default function Testimonials() {
             <span className="font-sans text-xs uppercase tracking-[0.3em] text-[#C5A059] block font-bold">
               RÉPUTATION
             </span>
-            <h2 className="font-serif text-4xl md:text-5xl font-medium tracking-wide text-[#051a0f]">
-              La Voix de l'Exigence
+            <h2 className="font-serif text-4xl md:text-5xl font-medium tracking-wide text-[#051a0f] bg-transparent">
+              Expériences Partagées
             </h2>
             <div className="w-16 h-0.5 bg-[#C5A059] my-4"></div>
             <p className="font-sans text-gray-500 font-light text-base md:text-lg">

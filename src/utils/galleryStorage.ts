@@ -1,66 +1,56 @@
 import { GalleryPhoto } from '../types';
-import { galleryPhotos as defaultPhotos } from '../data';
+import { db } from '../firebaseSetup';
+import { collection, getDocs, doc, setDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { handleFirestoreError, OperationType } from './firebaseError';
 
-const STORAGE_KEY = 'mtc_run_gallery_photos_v2';
+const COLLECTION_NAME = 'gallery_photos';
 
-/**
- * Get all gallery photos from local storage, falling back to data.ts defaults
- */
-export function getStoredPhotos(): GalleryPhoto[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      // Initialize with default photos
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultPhotos));
-      return defaultPhotos;
-    }
-    return JSON.parse(raw);
-  } catch (error) {
-    console.error('Error reading gallery photos from localStorage:', error);
-    return defaultPhotos;
-  }
-}
-
-/**
- * Save photos array to local storage
- */
-export function saveStoredPhotos(photos: GalleryPhoto[]): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(photos));
-  } catch (error) {
-    console.error('Error saving gallery photos to localStorage:', error);
-  }
-}
-
-/**
- * Add a new photo to the list
- */
-export function addPhotoToStorage(newPhoto: Omit<GalleryPhoto, 'id'>): GalleryPhoto {
-  const photos = getStoredPhotos();
-  const created: GalleryPhoto = {
-    ...newPhoto,
-    id: `photo-${Date.now()}`
-  };
+export function subscribeToGalleryPhotos(callback: (photos: GalleryPhoto[]) => void, errorCallback?: (error: any) => void) {
+  const q = query(collection(db, COLLECTION_NAME), orderBy('createdAt', 'desc'));
   
-  const updated = [created, ...photos];
-  saveStoredPhotos(updated);
-  return created;
+  return onSnapshot(q, (snapshot) => {
+    const photos: GalleryPhoto[] = [];
+    snapshot.forEach(doc => {
+      photos.push({ id: doc.id, ...doc.data() } as GalleryPhoto);
+    });
+    callback(photos);
+  }, (error) => {
+    handleFirestoreError(error, OperationType.GET, COLLECTION_NAME);
+    if (errorCallback) errorCallback(error);
+  });
 }
 
-/**
- * Update an existing photo by ID
- */
-export function updatePhotoInStorage(updatedPhoto: GalleryPhoto): void {
-  const photos = getStoredPhotos();
-  const updated = photos.map(p => p.id === updatedPhoto.id ? updatedPhoto : p);
-  saveStoredPhotos(updated);
+export async function addPhotoToStorage(newPhoto: Omit<GalleryPhoto, 'id'>): Promise<GalleryPhoto> {
+  const id = `photo-${Date.now()}`;
+  const docRef = doc(db, COLLECTION_NAME, id);
+  try {
+    await setDoc(docRef, { ...newPhoto, createdAt: Date.now() }); // Using Date.now so it's a number, compliant with our rule
+    return { ...newPhoto, id };
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, `${COLLECTION_NAME}/${id}`);
+    throw error;
+  }
 }
 
-/**
- * Delete a photo by ID
- */
-export function deletePhotoFromStorage(id: string): void {
-  const photos = getStoredPhotos();
-  const updated = photos.filter(p => p.id !== id);
-  saveStoredPhotos(updated);
+export async function updatePhotoInStorage(updatedPhoto: GalleryPhoto): Promise<void> {
+  const docRef = doc(db, COLLECTION_NAME, updatedPhoto.id);
+  const data = { ...updatedPhoto };
+  // remove id property before saving
+  delete (data as any).id;
+  try {
+    await setDoc(docRef, data, { merge: true });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, `${COLLECTION_NAME}/${updatedPhoto.id}`);
+    throw error;
+  }
 }
+
+export async function deletePhotoFromStorage(id: string): Promise<void> {
+  try {
+    await deleteDoc(doc(db, COLLECTION_NAME, id));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${COLLECTION_NAME}/${id}`);
+    throw error;
+  }
+}
+
