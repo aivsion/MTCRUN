@@ -102,7 +102,7 @@ export default function Header({ currentPage, setCurrentPage, scrollToSection }:
             onClick={() => handleNav('accueil', 'heritage-section')}
             className="font-sans text-[11px] uppercase tracking-[0.1em] text-gray-300 hover:text-[#C5A059] pb-1 transition-all duration-300 focus:outline-none"
           >
-            Héritage
+            Identité
           </button>
         </nav>
 
@@ -173,7 +173,7 @@ export default function Header({ currentPage, setCurrentPage, scrollToSection }:
               onClick={() => handleNav('accueil', 'heritage-section')}
               className="font-sans text-sm uppercase tracking-wider text-left py-2 text-gray-300 text-left focus:outline-none"
             >
-              Héritage
+              Identité
             </button>
             <div className="h-px bg-[#C5A059]/10 my-1"></div>
             <button

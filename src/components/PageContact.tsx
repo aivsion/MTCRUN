@@ -27,7 +27,7 @@ export default function PageContact() {
   };
 
   return (
-    <div className="w-full bg-[#fcfbfa] text-[#1a1c1c] pb-24">
+    <div className="w-full bg-[#fcfbfa] text-[#1a1c1c]">
       {/* 1. SECTION BANNER */}
       <section className="bg-[#051a0f] text-white py-16 md:py-24 relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#C5A059_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none"></div>

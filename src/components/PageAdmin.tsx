@@ -385,7 +385,7 @@ export default function PageAdmin({ setCurrentPage, onPhotosUpdated }: PageAdmin
   };
 
   return (
-    <div className="w-full bg-[#fcfbfa] text-[#1a1c1c] pb-24">
+    <div className="w-full bg-[#fcfbfa] text-[#1a1c1c]">
       {/* 1. HEADER HERO */}
       <section className="bg-[#051a0f] text-white py-16 px-6 relative border-b border-[#C5A059]/20">
         <div className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(#C5A059_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none"></div>

@@ -37,7 +37,7 @@ Chez MTC RUN CONSTRUCTION, nos charpentes fines, menuiseries d'exception et deck
   };
 
   return (
-    <div className="w-full bg-[#fcfbfa] text-[#1a1c1c] pb-24">
+    <div className="w-full bg-[#fcfbfa] text-[#1a1c1c]">
       {/* 1. HERO SECTION */}
       <section className="bg-[#051a0f] text-white py-20 md:py-28 relative">
         <div className="absolute inset-0 opacity-[0.05] bg-[radial-gradient(#C5A059_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none"></div>

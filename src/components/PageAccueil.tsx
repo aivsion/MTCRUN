@@ -1,7 +1,7 @@
 import { DIRIGEANT_PORTRAIT, HERO_ACCUEIL_BG, engagements } from '../data';
 import { Page } from '../types';
 import { motion } from 'motion/react';
-import { TreePine, Cpu, Timer, ArrowRight, Award, FileText, ExternalLink } from 'lucide-react';
+import { TreePine, Cpu, Timer, ArrowRight, Award, FileText, ExternalLink, ShieldCheck } from 'lucide-react';
 import Testimonials from './Testimonials';
 import ECHOBAT_LOGO from '../assets/images/regenerated_image_1781250096754.png';
 
@@ -197,7 +197,7 @@ export default function PageAccueil({ setCurrentPage }: PageAccueilProps) {
                 <div className="w-12 h-px bg-[#C5A059] mt-3"></div>
               </div>
 
-              <div className="space-y-4 text-gray-300 font-sans text-sm md:text-base leading-relaxed font-light">
+              <div className="space-y-4 text-gray-300 font-sans text-sm md:text-base leading-relaxed font-light text-justify hyphens-none">
                 <p>
                   MTC RUN est fier de faire partie de l'association <strong>ÉCHOBAT</strong>. Depuis 2010, ce réseau collaboratif rassemble les acteurs engagés de l'<strong>écoconstruction</strong>, de l'<strong>insertion par l'activité économique</strong> et de la <strong>formation professionnelle</strong>.
                 </p>
@@ -219,9 +219,6 @@ export default function PageAccueil({ setCurrentPage }: PageAccueilProps) {
                   <span>Découvrir echobat.fr</span>
                   <ExternalLink className="w-3.5 h-3.5 animate-pulse" />
                 </a>
-                <span className="font-sans text-gray-400 text-xs italic">
-                  Garant d'une démarche de haute qualité éthique et environnementale.
-                </span>
               </div>
             </div>
 
@@ -233,7 +230,7 @@ export default function PageAccueil({ setCurrentPage }: PageAccueilProps) {
       <Testimonials />
 
       {/* 4. SECTION PARCOURS / CV DU DIRIGEANT (HÉRITAGE) */}
-      <section id="heritage-section" className="py-24 md:py-32 bg-[#f9f9f9] text-[#1a1c1c] scroll-mt-24 border-t border-gray-100">
+      <section id="heritage-section" className="pt-24 md:pt-32 pb-12 md:pb-16 bg-[#f9f9f9] text-[#1a1c1c] scroll-mt-24 border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
             {/* Left Column (Text) */}
@@ -248,7 +245,7 @@ export default function PageAccueil({ setCurrentPage }: PageAccueilProps) {
                 <div className="w-16 h-1 bg-[#C5A059]"></div>
               </div>
 
-              <div className="space-y-6 text-gray-700 font-sans text-base leading-relaxed font-light">
+              <div className="space-y-6 text-gray-700 font-sans text-base md:text-lg leading-relaxed font-light text-justify hyphens-none">
                 <p>
                   Fort de plus de 15 années d'expérience dans le secteur de la construction haut de gamme, Sébastien Boistel incarne la rigueur et la passion du bâti. Certifié par l'AFPAR, son parcours est jalonné de réalisations complexes alliant technicité et esthétisme.
                 </p>
@@ -258,20 +255,28 @@ export default function PageAccueil({ setCurrentPage }: PageAccueilProps) {
               </div>
 
               {/* Key indicators */}
-              <div className="pt-6 border-t border-gray-200 flex flex-col md:flex-row gap-8 items-start md:items-center">
-                <div className="flex items-center gap-4">
-                  <span className="font-serif text-3xl md:text-4xl font-extrabold text-[#051a0f]">15+</span>
-                  <div className="text-left">
-                    <span className="block font-sans text-[10px] tracking-widest text-[#C5A059] uppercase font-bold">Années d'expérience</span>
-                    <span className="block font-sans text-[11px] text-gray-500">Bâtiment d'exception</span>
-                  </div>
-                </div>
-                <div className="hidden md:block h-10 w-px bg-gray-200"></div>
-                <div className="flex items-center gap-4">
+              <div className="pt-6 border-t border-gray-200 flex flex-row flex-wrap xl:flex-nowrap justify-between items-center w-full">
+                <div className="flex items-center gap-3">
                   <Award className="w-8 h-8 text-[#051a0f]" />
                   <div className="text-left">
-                    <span className="block font-sans text-[10px] tracking-widest text-[#C5A059] uppercase font-bold">AFPAR CERTIFICATION</span>
-                    <span className="block font-sans text-[11px] text-gray-500">Label d'excellence certifié</span>
+                    <span className="block font-sans text-[11px] tracking-widest text-[#C5A059] uppercase font-bold">AFPAR CERTIFIÉ</span>
+                    <span className="block font-sans text-xs text-gray-500">Label d'excellence</span>
+                  </div>
+                </div>
+                <div className="hidden md:block h-8 w-px bg-gray-200"></div>
+                <div className="flex items-center gap-3">
+                  <span className="font-serif text-4xl font-extrabold text-[#051a0f]">15+</span>
+                  <div className="text-left">
+                    <span className="block font-sans text-[11px] tracking-widest text-[#C5A059] uppercase font-bold">Années d'expérience</span>
+                    <span className="block font-sans text-xs text-gray-500">Bâtiment d'exception</span>
+                  </div>
+                </div>
+                <div className="hidden md:block h-8 w-px bg-gray-200"></div>
+                <div className="flex items-center gap-3">
+                  <ShieldCheck className="w-8 h-8 text-[#051a0f]" />
+                  <div className="text-left">
+                    <span className="block font-sans text-[11px] tracking-widest text-[#C5A059] uppercase font-bold">DÉCENNALE</span>
+                    <span className="block font-sans text-xs text-gray-500">Garantie 10 ans</span>
                   </div>
                 </div>
               </div>
