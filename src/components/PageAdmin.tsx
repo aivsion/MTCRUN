@@ -199,7 +199,7 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
           const img = new Image();
           img.onload = () => {
             const canvas = document.createElement('canvas');
-            const MAX_SIZE = 1024;
+            const MAX_SIZE = 600;
             let width = img.width;
             let height = img.height;
 
@@ -222,7 +222,7 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
             // Clean/beautify the filename for default title
             const label = file.name.split('.').slice(0, -1).join('.').replace(/[-_]/g, ' ');
             resolve({
-              url: canvas.toDataURL('image/jpeg', 0.8),
+              url: canvas.toDataURL('image/jpeg', 0.5),
               title: label.charAt(0).toUpperCase() + label.slice(1),
               filename: file.name
             });
@@ -297,7 +297,7 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
   };
 
   // Handle form submission (Add or Edit)
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.url && uploadedFiles.length === 0) {
@@ -305,57 +305,62 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
       return;
     }
 
-    if (isEditing && editingPhoto) {
-      // Edit mode
-      const updated: GalleryPhoto = {
-        ...editingPhoto,
-        title: formData.title || 'Nouvelle réalisation',
-        category: formData.category || 'CHARPENTE BOIS',
-        chantierName: formData.chantierName || 'Nouveau Chantier',
-        location: formData.location || 'La Réunion',
-        description: formData.description || '',
-        urls: uploadedFiles.length > 0 ? uploadedFiles.map(f => f.url) : editingPhoto.urls
-      };
-      updatePhotoInStorage(updated);
-      setSuccessMessage('Photo de chantier modifiée avec succès.');
-    } else {
-      // Create mode
-      if (uploadedFiles.length > 0) {
-        // Uploaded files mode
-        const chantierId = `chantier-${Date.now()}`;
-        const finalChantierName = formData.chantierName || 'Nouveau Chantier';
-        
-        addPhotoToStorage({
-          title: formData.title || 'Nouvelle réalisation',
-          category: formData.category || 'CHARPENTE BOIS',
-          chantierName: finalChantierName,
-          location: formData.location || 'La Réunion',
-          description: formData.description || '',
-          urls: uploadedFiles.map(f => f.url),
-          chantierId: chantierId
-        });
-        
-        setSuccessMessage(`✨ Chantier "${finalChantierName}" avec ${uploadedFiles.length} photo(s) ajouté avec succès.`);
-      } else {
-        // Direct URL mode (fallback if URL was manual - but wait, we only support urls array now)
-        addPhotoToStorage({
+    try {
+      if (isEditing && editingPhoto) {
+        // Edit mode
+        const updated: GalleryPhoto = {
+          ...editingPhoto,
           title: formData.title || 'Nouvelle réalisation',
           category: formData.category || 'CHARPENTE BOIS',
           chantierName: formData.chantierName || 'Nouveau Chantier',
           location: formData.location || 'La Réunion',
           description: formData.description || '',
-          urls: formData.url ? [formData.url] : [],
-          chantierId: `chantier-${Date.now()}`
-        });
-        setSuccessMessage('Nouvelle photo de chantier ajoutée avec succès.');
+          urls: uploadedFiles.length > 0 ? uploadedFiles.map(f => f.url) : editingPhoto.urls
+        };
+        await updatePhotoInStorage(updated);
+        setSuccessMessage('Photo de chantier modifiée avec succès.');
+      } else {
+        // Create mode
+        if (uploadedFiles.length > 0) {
+          // Uploaded files mode
+          const chantierId = `chantier-${Date.now()}`;
+          const finalChantierName = formData.chantierName || 'Nouveau Chantier';
+          
+          await addPhotoToStorage({
+            title: formData.title || 'Nouvelle réalisation',
+            category: formData.category || 'CHARPENTE BOIS',
+            chantierName: finalChantierName,
+            location: formData.location || 'La Réunion',
+            description: formData.description || '',
+            urls: uploadedFiles.map(f => f.url),
+            chantierId: chantierId
+          });
+          
+          setSuccessMessage(`✨ Chantier "${finalChantierName}" avec ${uploadedFiles.length} photo(s) ajouté avec succès.`);
+        } else {
+          // Direct URL mode (fallback if URL was manual - but wait, we only support urls array now)
+          await addPhotoToStorage({
+            title: formData.title || 'Nouvelle réalisation',
+            category: formData.category || 'CHARPENTE BOIS',
+            chantierName: formData.chantierName || 'Nouveau Chantier',
+            location: formData.location || 'La Réunion',
+            description: formData.description || '',
+            urls: formData.url ? [formData.url] : [],
+            chantierId: `chantier-${Date.now()}`
+          });
+          setSuccessMessage('Nouvelle photo de chantier ajoutée avec succès.');
+        }
       }
-    }
 
-    // Reset Form & state
-    resetForm();
-    onPhotosUpdated(); // Trigger refresh in parent
-    setPhotos(getStoredPhotos()); // Refresh local grid
-    setTimeout(() => setSuccessMessage(''), 4000);
+      // Reset Form & state
+      resetForm();
+      onPhotosUpdated(); // Trigger refresh in parent
+      // Note: we can't reliably load getStoredPhotos if it hasn't synced, but we use subscription
+      setTimeout(() => setSuccessMessage(''), 4000);
+    } catch (err: any) {
+      alert("Erreur: L'image est peut-être trop lourde pour être sauvegardée ou réseau indisponible. " + err.message);
+      console.error(err);
+    }
   };
 
   const resetForm = () => {
@@ -385,14 +390,26 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
       chantierName: photo.chantierName,
       location: photo.location,
       description: photo.description,
-      url: photo.urls && photo.urls.length > 0 ? photo.urls[0] : ''
+      url: (photo.urls && photo.urls.length > 0) ? photo.urls[0] : (photo.url || '')
     });
     setFileBase64('');
-    setUploadedFiles(photo.urls ? photo.urls.map((u, i) => ({
-      url: u,
-      title: `${photo.title} ${i + 1}`,
-      filename: `image-${i}`
-    })) : []);
+    
+    // Handle migration from .url to .urls smoothly
+    let filesToLoad: any[] = [];
+    if (photo.urls && photo.urls.length > 0) {
+      filesToLoad = photo.urls.map((u, i) => ({
+        url: u,
+        title: `${photo.title} ${i + 1}`,
+        filename: `image-${i}`
+      }));
+    } else if (photo.url) {
+      filesToLoad = [{
+        url: photo.url,
+        title: photo.title,
+        filename: 'image-existante'
+      }];
+    }
+    setUploadedFiles(filesToLoad);
     
     // Scroll smoothly to edit form
     window.scrollTo({ top: 300, behavior: 'smooth' });
@@ -402,14 +419,19 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
   const handleDelete = (id: string, title: string) => {
     const confirmDelete = window.confirm(`Êtes-vous sûr de vouloir supprimer définitivement la photo "${title}" ?`);
     if (confirmDelete) {
-      deletePhotoFromStorage(id);
-      setSuccessMessage('Photo supprimée définitivement.');
-      onPhotosUpdated(); // Trigger parent reload
-      setPhotos(getStoredPhotos()); // Refresh current page
-      setTimeout(() => setSuccessMessage(''), 3000);
-      if (isEditing && editingPhoto?.id === id) {
-        resetForm();
-      }
+      deletePhotoFromStorage(id)
+        .then(() => {
+          setSuccessMessage('Photo supprimée définitivement.');
+          onPhotosUpdated(); // Trigger parent reload
+          // We rely on subscribeToGalleryPhotos to update photos state automatically
+          setTimeout(() => setSuccessMessage(''), 3000);
+          if (isEditing && editingPhoto?.id === id) {
+            resetForm();
+          }
+        })
+        .catch(err => {
+          alert("Erreur lors de la suppression. " + err.message);
+        });
     }
   };
 
@@ -869,8 +891,8 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
                   <button
                     type="button"
                     onClick={() => {
-                      setPhotos(getStoredPhotos());
-                      setSuccessMessage('Données de la galerie réactualisées.');
+                      // Handled by snapshot listener automatically. Just show a message.
+                      setSuccessMessage('Données de la galerie synchronisées en temps réel.');
                       setTimeout(() => setSuccessMessage(''), 2000);
                     }}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-stone-200 hover:border-stone-400 text-stone-500 hover:text-[#051a0f] bg-stone-50 text-xs font-bold uppercase font-sans tracking-wide transition-all cursor-pointer"
@@ -946,7 +968,7 @@ export default function PageAdmin({ setCurrentPage }: PageAdminProps) {
                       {/* Image Preview Thumbnail */}
                       <div className="w-20 sm:w-24 aspect-[4/3] relative flex-shrink-0 bg-stone-100 overflow-hidden border border-stone-100">
                         <img 
-                          src={photo.urls && photo.urls.length > 0 ? photo.urls[0] : ''} 
+                          src={(photo.urls && photo.urls.length > 0) ? photo.urls[0] : (photo.url || '')} 
                           alt={photo.title} 
                           className="w-full h-full object-cover"
                           referrerPolicy="no-referrer"
